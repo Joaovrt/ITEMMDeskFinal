@@ -97,7 +97,7 @@ export default function MeusChamados({ navigation }) {
     if (loading) {
         return (
             <View style={styles.container}>
-                <ActivityIndicator size="large" color="orange" />
+                <ActivityIndicator size="large" color="#99CC6A" />
             </View>
         );
     } else {
@@ -153,7 +153,7 @@ export default function MeusChamados({ navigation }) {
     const styles = StyleSheet.create({
         container: {
             flex: 1,
-            backgroundColor: "#38a69D",
+            backgroundColor: "#263868",
             paddingTop: 60,
         },
         headerTitle: {
@@ -161,7 +161,7 @@ export default function MeusChamados({ navigation }) {
             fontWeight: 'bold',
             textAlign: 'center',
             marginVertical: 15,
-            color: 'orange',
+            color: '#99CC6A',
         },
         containerFlatlist: {
             width: "100%",
@@ -189,14 +189,14 @@ export default function MeusChamados({ navigation }) {
             top: 10,
             left: 10,
             padding: 10,
-            backgroundColor: 'orange',
+            backgroundColor: '#99CC6A',
             borderRadius: 5,
             zIndex: 1  
         },
         activeButton: {
             marginHorizontal: 10,
             padding: 10,
-            backgroundColor: 'orange',
+            backgroundColor: '#99CC6A',
             borderRadius: 5
         },
         inactiveButton: {

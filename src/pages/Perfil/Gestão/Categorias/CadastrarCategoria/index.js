@@ -62,7 +62,7 @@ const styles = StyleSheet.create({
 
     container: {
         flexGrow: 1,
-        backgroundColor: "#38a69d",
+        backgroundColor: "#263868",
         alignItems: "center",
         justifyContent: "flex-start",
         paddingTop: 70,
@@ -77,7 +77,7 @@ const styles = StyleSheet.create({
         fontSize: 20,
         fontWeight: "bold",
         marginBottom: 5,
-        color: 'orange',
+        color: '#99CC6A',
     },
 
     input: {
@@ -95,7 +95,7 @@ const styles = StyleSheet.create({
   },
 
     buttonSend: {
-        backgroundColor: "orange",
+        backgroundColor: "#99CC6A",
         paddingHorizontal: 20,
         paddingVertical: 10,
         borderRadius: 30,
@@ -111,7 +111,7 @@ const styles = StyleSheet.create({
         top: 10,
         left: 10,
         padding: 10,
-        backgroundColor: 'orange',
+        backgroundColor: '#99CC6A',
         borderRadius: 5,
         zIndex: 1  
     },

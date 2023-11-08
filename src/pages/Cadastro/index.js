@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, ScrollView, Image, Button, Alert } from "react-native";
+import { View, Text, TextInput, TouchableOpacity, StyleSheet, ScrollView, Image, Button, Alert, ActivityIndicator } from "react-native";
 import { getFirestore, collection, addDoc, Timestamp } from 'firebase/firestore';
 import { database } from "../../config";
 import * as ImagePicker from 'expo-image-picker';
@@ -13,6 +13,7 @@ export default function Cadastro({ navigation }) {
     const [telefone, setTelefone] = useState("");
     const [imagem, setImagem] = useState("");
     const [senha, setSenha] = useState("");
+    const [carregar, setCarregar] = useState(false)
 
     useEffect(() => {
         // Solicitar permissões no carregamento do componente
@@ -42,10 +43,26 @@ export default function Cadastro({ navigation }) {
     };
 
     const uploadImageAndAdd = async () => {
-        if (!imagem) {
+        if (!AllFieldsAreFilled()) {
+            Alert.alert("Preencha todos os campos");
+            return;
+        } else if (!isValidEmail(email)) {
+            Alert.alert("Por favor, insira um e-mail válido");
+            return;
+        } else if (!isValidPassword(senha)) {
+            Alert.alert("A senha deve ter pelo menos 8 caracteres, 1 letra maiúscula, 1 número e 1 caractere especial");
+            return;
+        } else if (!isValidCPF(cpf)) {
+            Alert.alert("CPF invalido");
+            return;
+        } else if (!isValidTelefone(telefone)) {
+            Alert.alert("Celular invalido");
+            return;
+        } else if (!imagem) {
             Alert.alert("Selecione uma imagem antes de prosseguir.");
             return;
         }
+        setCarregar(true)
 
         const storage = getStorage();
         const storageRef = ref(storage, 'uploads/' + Date.now() + '.jpg');
@@ -61,50 +78,36 @@ export default function Cadastro({ navigation }) {
             // Continue com a adição do documento ao Firebase Firestore, usando a URL de download
             add(downloadURL);
         } catch (error) {
+            setCarregar(false)
             console.error("Erro ao fazer o upload da imagem:", error);
             Alert.alert("Erro ao fazer o upload da imagem. Tente novamente. Erro: " + error.message);
         }
     };
 
     const add = (imagemURL) => {
-        if (!AllFieldsAreFilled()) {
-            Alert.alert("Preencha todos os campos");
-            return;
-        } else if (!isValidEmail(email)) {
-            Alert.alert("Por favor, insira um e-mail válido");
-            return;
-        } else if (!isValidPassword(senha)) {
-            Alert.alert("A senha deve ter pelo menos 8 caracteres, 1 letra maiúscula, 1 número e 1 caractere especial");
-            return;
-        } else if (!isValidCPF(cpf)) {
-            Alert.alert("O CPF deve ter 11 dígitos e conter apenas números");
-            return;
-        } else if (!isValidTelefone(telefone)) {
-            Alert.alert("O telefone deve ter no mínimo 10 dígitos e conter apenas números");
-            return;
-        } else {
-            const dataAtual = Timestamp.now();
+        const dataAtual = Timestamp.now();
 
-            console.log("Adicionando documento ao Firestore...");
+        console.log("Adicionando documento ao Firestore...");
 
-            addDoc(collection(database, "Clientes"), {
-                nome: nome,
-                email: email,
-                cpf: cpf,
-                telefone: telefone,
-                senha: senha,
-                registro: "Cliente",
-                imagem: imagemURL,  // Use a URL da imagem aqui
-            })
+        addDoc(collection(database, "Clientes"), {
+            nome: nome,
+            email: email,
+            cpf: cpf,
+            telefone: telefone,
+            senha: senha,
+            registro: "Cliente",
+            imagem: imagemURL,  // Use a URL da imagem aqui
+        })
             .then(() => {
+                setCarregar(false)
                 console.log("Documento adicionado com sucesso.");
                 navigation.navigate("SignIn");
             })
             .catch((error) => {
+                setCarregar(false)
                 console.error("Erro ao adicionar documento ao Firestore:", error);
                 Alert.alert("Erro ao adicionar o documento ao Firestore. Tente novamente.");
             });
-        }
     };
 
     function capitalizeName(name) {
@@ -129,11 +132,55 @@ export default function Cadastro({ navigation }) {
     }
 
     function isValidCPF(cpf) {
-        return cpf.length === 11 && /^\d+$/.test(cpf);
+        const cpfStr = cpf?.replace(/[^\d]+/g, '');
+
+        if (cpfStr === '') return false;
+
+        if (cpfStr?.length !== 11)
+            return false;
+
+        if (cpfStr === "00000000000" ||
+            cpfStr === "11111111111" ||
+            cpfStr === "22222222222" ||
+            cpfStr === "33333333333" ||
+            cpfStr === "44444444444" ||
+            cpfStr === "55555555555" ||
+            cpfStr === "66666666666" ||
+            cpfStr === "77777777777" ||
+            cpfStr === "88888888888" ||
+            cpfStr === "99999999999")
+            return false;
+
+        var soma;
+        var resto;
+
+        soma = 0;
+
+        for (let i = 1; i <= 9; i++)
+            soma += parseInt(cpfStr.substring(i - 1, i)) * (11 - i);
+
+        resto = (soma * 10) % 11;
+
+        if ((resto == 10) || (resto == 11)) resto = 0;
+
+        if (resto != parseInt(cpfStr.substring(9, 10))) return false;
+
+        soma = 0;
+
+        for (let i = 1; i <= 10; i++)
+            soma += parseInt(cpfStr.substring(i - 1, i)) * (12 - i);
+
+        resto = (soma * 10) % 11;
+
+        if ((resto == 10) || (resto == 11)) resto = 0;
+
+        if (resto != parseInt(cpfStr.substring(10, 11))) return false;
+
+        return true;
     }
 
     function isValidTelefone(telefone) {
-        return telefone.length >= 10 && /^\d+$/.test(telefone);
+        return telefone.length == 15;
     }
 
     function AllFieldsAreFilled() {
@@ -153,11 +200,51 @@ export default function Cadastro({ navigation }) {
     }
 
 
+    const formatCpf = (text) => {
+        // Remove qualquer caractere não numérico do texto
+        const cleanedText = text.replace(/\D/g, '');
+
+        // Formata o CPF (###.###.###-##)
+        const match = cleanedText.match(/^(\d{0,3})(\d{0,3})(\d{0,3})(\d{0,2})$/);
+        let formattedText = '';
+        if (match) {
+            formattedText = match[1];
+            if (match[2]) formattedText += `.${match[2]}`;
+            if (match[3]) formattedText += `.${match[3]}`;
+            if (match[4]) formattedText += `-${match[4]}`;
+        }
+        return formattedText;
+    };
+
+    const formatPhoneNumber = (phoneNumber) => {
+        // Remove qualquer caractere não numérico do número de telefone
+        const cleanedNumber = phoneNumber.replace(/\D/g, '');
+
+        // Formata o número de telefone (XX) 99999-9999
+        const match = cleanedNumber.match(/^(\d{0,2})(\d{0,5})(\d{0,4})$/);
+        let formattedNumber = '';
+        if (match) {
+            formattedNumber = `(${match[1]})`;
+            if (match[2]) formattedNumber += ` ${match[2]}`;
+            if (match[3]) formattedNumber += `-${match[3]}`;
+        }
+        return formattedNumber;
+    };
+
+    const handleCpfChange = (text) => {
+        const formattedCpf = formatCpf(text);
+        setCpf(formattedCpf);
+    };
+
+    const handlePhoneChange = (text) => {
+        const formattedNumber = formatPhoneNumber(text);
+        setTelefone(formattedNumber);
+    };
 
     return (
-        <ScrollView style={{ flex: 1, backgroundColor: "#38a69d" }}>
-            <TouchableOpacity 
-                style={styles.backButton} 
+        <ScrollView style={{ flex: 1, backgroundColor: "#263868" }}>
+            <TouchableOpacity
+                style={styles.backButton}
                 onPress={() => navigation.goBack()}
             >
                 <Ionicons name="arrow-back" size={24} color="white" />
@@ -165,26 +252,27 @@ export default function Cadastro({ navigation }) {
 
             <View style={styles.container}>
                 <Text style={styles.label}>Nome Completo</Text>
-                <TextInput 
-                    style={styles.input} 
-                    placeholder="Digite..." 
-                    onChangeText={(text) => setNome(capitalizeName(text))} 
-                    value={nome} 
+                <TextInput
+                    style={styles.input}
+                    placeholder="Digite..."
+                    onChangeText={(text) => setNome(capitalizeName(text))}
+                    value={nome}
                 />
 
-                <Text style={styles.label}>Email</Text>
+                <Text style={styles.label}>E-mail</Text>
                 <TextInput style={styles.input} placeholder="Digite..." onChangeText={(text) => setEmail(text.toLowerCase())} value={email} />
 
                 <Text style={styles.label}>Cpf</Text>
-                <TextInput style={styles.input} placeholder="Digite..." onChangeText={setCpf} value={cpf} keyboardType="numeric" />
+                <TextInput style={styles.input} placeholder="Digite..." onChangeText={handleCpfChange} value={cpf} keyboardType="numeric" maxLength={14} />
 
-                <Text style={styles.label}>Telefone</Text>
-                <TextInput 
-                    style={styles.input} 
-                    placeholder="Digite com o DDD" 
-                    onChangeText={setTelefone} 
-                    value={telefone} 
+                <Text style={styles.label}>Celular</Text>
+                <TextInput
+                    style={styles.input}
+                    placeholder="Digite com o DDD"
+                    onChangeText={handlePhoneChange}
+                    value={telefone}
                     keyboardType="numeric"
+                    maxLength={15}
                 />
 
                 <Text style={styles.label}>Senha</Text>
@@ -196,12 +284,16 @@ export default function Cadastro({ navigation }) {
                     secureTextEntry={true}
                 />
 
-                {imagem && <Image source={{ uri: imagem }} style={{width: 100, height: 100}} />}
+                <Text style={styles.label}>Foto de perfil</Text>
+                {imagem && <Image source={{ uri: imagem }} style={{ width: 100, height: 100 }} />}
                 <Button title="Escolher Imagem" onPress={pickImage} />
 
-                <TouchableOpacity style={styles.buttonSend} onPress={uploadImageAndAdd}>
-                    <Text style={styles.buttonText}>Confirmar</Text>
-                </TouchableOpacity>
+                {!carregar &&
+                    <TouchableOpacity style={styles.buttonSend} onPress={uploadImageAndAdd}>
+                        <Text style={styles.buttonText}>Confirmar</Text>
+                    </TouchableOpacity>
+                }
+                {carregar && <ActivityIndicator style={{marginTop:'5%'}} size="large" color="#FFFFFF" />}
 
             </View>
         </ScrollView>
@@ -219,7 +311,7 @@ const styles = StyleSheet.create({
         fontSize: 20,
         fontWeight: "bold",
         marginBottom: 10,
-        color: 'orange'
+        color: '#99CC6A'
     },
     input: {
         backgroundColor: "#f8f8f8",
@@ -232,7 +324,7 @@ const styles = StyleSheet.create({
         borderWidth: 1,
     },
     buttonSend: {
-        backgroundColor: "orange",
+        backgroundColor: "#99CC6A",
         paddingHorizontal: 35,
         paddingVertical: 15,
         borderRadius: 40,
@@ -257,9 +349,9 @@ const styles = StyleSheet.create({
         top: 10,
         left: 10,
         padding: 10,
-        backgroundColor: 'orange',
+        backgroundColor: '#99CC6A',
         borderRadius: 5,
-        zIndex: 1  
+        zIndex: 1
     },
     backButtonText: {
         color: '#ffffff',

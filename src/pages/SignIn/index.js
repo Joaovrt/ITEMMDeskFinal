@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { View, Text, StyleSheet, TextInput, TouchableOpacity, Alert } from "react-native";
+import { View, Text, StyleSheet, TextInput, TouchableOpacity, Alert, ActivityIndicator } from "react-native";
 import { useNavigation } from '@react-navigation/native';
 import * as Animatable from 'react-native-animatable';
 import { collection, getDocs, query, where } from 'firebase/firestore';
@@ -10,10 +10,12 @@ import { Ionicons } from '@expo/vector-icons';
 export default function SignIn() {
     const navigation = useNavigation();
     const [email, setEmail] = useState('');
+    const [carregar,setCarregar]=useState(false);
     const [password, setPassword] = useState('');
     const { handleLogin } = useUser();
 
     const handleSignIn = async () => {
+        setCarregar(true)
         const clientQuery = query(
             collection(database, "Clientes"),
             where("email", "==", email),
@@ -38,7 +40,7 @@ export default function SignIn() {
 
         if (!clientSnapshot.empty || !attendantSnapshot.empty || !adminSnapshot.empty) {
             await handleLogin(email);
-
+            setCarregar(false)
             navigation.navigate('Main', {
                 screen: 'Perfil'
             });
@@ -46,6 +48,7 @@ export default function SignIn() {
             setEmail('');
             setPassword('');
         } else {
+            setCarregar(false)
             Alert.alert('Erro', 'E-mail ou senha incorretos.');
         }
     };
@@ -80,19 +83,20 @@ export default function SignIn() {
                     secureTextEntry={true}
                 />
 
-                <TouchableOpacity 
+                {!carregar && <TouchableOpacity 
                     style={styles.button}
                     onPress={handleSignIn}
                 >
                     <Text style={styles.buttonText}> Acessar </Text>
-                </TouchableOpacity>
+                </TouchableOpacity>}
 
-                <TouchableOpacity 
+                {!carregar && <TouchableOpacity 
                     style={styles.buttonRegister}
                     onPress={() => navigation.navigate('Cadastro')}
                 >
                     <Text style={styles.registerText}> Não possui uma conta? Cadastre-se</Text>
-                </TouchableOpacity>
+                </TouchableOpacity>}
+                {carregar && <ActivityIndicator style={{marginTop:'5%'}} size="large" color="#263868" />}
             </Animatable.View>
         </View>
     );
@@ -101,7 +105,7 @@ export default function SignIn() {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: '#38a69d',
+        backgroundColor: '#263868',
         paddingTop: 40,
     },
     containerHeader: {
@@ -133,7 +137,7 @@ const styles = StyleSheet.create({
         fontSize: 16,
     },
     button: {
-        backgroundColor: '#38a69d',
+        backgroundColor: '#263868',
         width: '100%',
         borderRadius: 4,
         paddingVertical: 8,
@@ -158,7 +162,7 @@ const styles = StyleSheet.create({
         top: 10,
         left: 10,
         padding: 10,
-        backgroundColor: 'orange',
+        backgroundColor: '#99CC6A',
         borderRadius: 5,
         zIndex: 1
     },

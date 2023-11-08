@@ -20,21 +20,21 @@ export default function Gestão() {
                 style={styles.button}
                 onPress={() => navigation.navigate("Atendentes")}
             >
-                <Icon name="user" size={40} color="orange" />
+                <Icon name="user" size={40} color="#99CC6A" />
                 <Text style={styles.title}>Atendentes</Text>
             </TouchableOpacity>
             <TouchableOpacity
                 style={styles.button}
                 onPress={() => navigation.navigate("Departamentos")}
             >
-                <Icon name="reorder" size={40} color="orange" />
+                <Icon name="reorder" size={40} color="#99CC6A" />
                 <Text style={styles.title}>Departamentos</Text>
             </TouchableOpacity>
             <TouchableOpacity
                 style={styles.button}
                 onPress={() => navigation.navigate("Categorias")}
             >
-                <Icon name="reorder" size={40} color="orange" />
+                <Icon name="reorder" size={40} color="#99CC6A" />
                 <Text style={styles.title}>Categorias</Text>
             </TouchableOpacity> 
         </View>
@@ -44,7 +44,7 @@ export default function Gestão() {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: "#38a69d",
+        backgroundColor: "#263868",
         alignItems: "center",
         justifyContent: "center",
     },
@@ -70,7 +70,7 @@ const styles = StyleSheet.create({
         top: 10,
         left: 10,
         padding: 10,
-        backgroundColor: 'orange',
+        backgroundColor: '#99CC6A',
         borderRadius: 5,
         zIndex: 1  
     },

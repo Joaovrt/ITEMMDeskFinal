@@ -140,7 +140,7 @@ function VisualizarChamados({ route, navigation }) {
 const styles = StyleSheet.create({
     scrollContainer: {
         flex: 1,
-        backgroundColor: "#38a69D"
+        backgroundColor: "#263868"
     },
     container: {
         padding: 20,
@@ -150,7 +150,7 @@ const styles = StyleSheet.create({
         fontSize: 18,
         fontWeight: 'bold',
         marginTop: 10,
-        color: "orange"
+        color: "#99CC6A"
     },
     data: {
         fontSize: 16,
@@ -165,7 +165,7 @@ const styles = StyleSheet.create({
     },
     button: {
         marginTop: 20,
-        backgroundColor: "orange",
+        backgroundColor: "#99CC6A",
         padding: 10,
         borderRadius: 20,
         alignItems: 'center',
@@ -189,7 +189,7 @@ const styles = StyleSheet.create({
         top: 10,
         left: 10,
         padding: 10,
-        backgroundColor: 'orange',
+        backgroundColor: '#99CC6A',
         borderRadius: 5,
         zIndex: 1  
     },

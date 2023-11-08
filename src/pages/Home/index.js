@@ -2,7 +2,10 @@ import React, { useEffect, useState } from "react";
 import { View, StyleSheet, Dimensions, Text, TouchableOpacity } from "react-native";
 import { BarChart } from 'react-native-chart-kit';
 import { getFirestore, collection, onSnapshot, query, where, getDocs } from 'firebase/firestore';
-import XLSX from 'xlsx';
+import * as XLSX from 'xlsx';
+import * as FileSystem from 'expo-file-system';
+import * as Sharing from 'expo-sharing';
+import { BackHandler } from 'react-native';
 
 import { database } from "../../config";
 
@@ -34,26 +37,77 @@ export default function Home() {
         });
     };
 
-    async function createExcelFile(data) {
+
+    const getDateFormatted = () => {
+        const now = new Date();
+        const year = now.getFullYear();
+        const month = String(now.getMonth() + 1).padStart(2, '0'); // Adiciona zero à esquerda se o mês for menor que 10
+        const day = String(now.getDate()).padStart(2, '0'); // Adiciona zero à esquerda se o dia for menor que 10
+        return `${year}-${month}-${day}`;
+    };
+
+
+    const generateExcel = async () => {
+        console.log("entrie")
         try {
-            const ws = XLSX.utils.aoa_to_sheet(data);
-            const wb = XLSX.utils.book_new();
-            XLSX.utils.book_append_sheet(wb, ws, 'Relatório'); // Nome da planilha
+            const querySnapshot = await getDocs(collection(database, 'Chamados'));
+            const temp = [];
 
-            // Salve o arquivo Excel em um local específico, ou realize outras ações necessárias com o arquivo Excel aqui
+            querySnapshot.forEach((doc) => {
+                // Obtém o ID do documento
+                const id = doc.id;
+                // Obtém os dados do documento
+                const data = doc.data();
+                // Adiciona o ID ao objeto de dados
+                const dataWithId = { id, ...data };
+                // Adiciona o objeto de dados com o ID ao array temporário
+                temp.push(dataWithId);
+            });
 
+            // Obtém os nomes dos atributos do primeiro objeto no array
+            const attributeNames = Object.keys(temp[0]);
+            const dataArray = [attributeNames]
+            temp.forEach(obj => {
+                const row = attributeNames.map(attr => obj[attr]);
+                dataArray.push(row);
+            });
+            let wb = XLSX.utils.book_new();
+            let ws = XLSX.utils.aoa_to_sheet(dataArray);
+
+            XLSX.utils.book_append_sheet(wb, ws, "MyFirstSheet", true);
+
+            const base64 = XLSX.write(wb, { type: "base64" });
+            const currentDate = getDateFormatted();
+            const filename = FileSystem.documentDirectory + `RelatorioChamados_${currentDate}.xlsx`;
+            FileSystem.writeAsStringAsync(filename, base64, {
+                encoding: FileSystem.EncodingType.Base64
+            }).then(() => {
+                Sharing.shareAsync(filename);
+            });
         } catch (error) {
-            console.error('Erro ao criar o relatório:', error);
-            alert('Erro ao criar o relatório.');
+            console.error('Erro ao buscar dados da API:', error);
         }
-    }
+    };
+
 
     useEffect(() => {
         const unsubscribe = onSnapshot(collection(database, 'Chamados'), () => {
             updateData();
         });
 
-        return () => unsubscribe();  
+        const handleBackButton = () => {
+            // Impedir a ação de voltar
+            return true;
+        };
+
+        // Adicionar um listener para o botão de voltar
+        BackHandler.addEventListener('hardwareBackPress', handleBackButton);
+
+
+        return () => {
+            unsubscribe();
+            BackHandler.removeEventListener('hardwareBackPress', handleBackButton);
+        };
     }, []);
 
     return (
@@ -75,8 +129,8 @@ export default function Home() {
                             backgroundGradientFrom: 'black',
                             backgroundGradientTo: 'black',
                             decimalPlaces: 0,
-                            color: (opacity = 1) => `rgba(255, 140, 0, ${opacity})`,
-                            fillShadowGradient: 'rgb(255, 140, 0)',
+                            color: (opacity = 1) => `rgba(255, 255, 255, ${opacity})`,
+                            fillShadowGradient: 'rgb(153, 204, 106)',
                             fillShadowGradientOpacity: 1,
                             style: {
                                 borderRadius: 16,
@@ -94,7 +148,7 @@ export default function Home() {
                     </View>
                 </View>
             </View>
-            <TouchableOpacity style={styles.button} onPress={() => createExcelFile(data)}>
+            <TouchableOpacity style={styles.button} onPress={generateExcel}>
                 <Text style={[styles.buttonText, { fontWeight: 'bold' }]}>Emitir Relatório Excel</Text>
             </TouchableOpacity>
         </View>
@@ -106,7 +160,7 @@ const styles = StyleSheet.create({
     container: {
         flex: 1,
         padding: 16,
-        backgroundColor: '#38a69D',
+        backgroundColor: '#263868',
     },
     welcomeText: {
         marginTop: 15,
@@ -124,7 +178,7 @@ const styles = StyleSheet.create({
     bullet: {
         width: 10,
         height: 10,
-        backgroundColor: 'orange',
+        backgroundColor: '#99CC6A',
         borderRadius: 5,
         marginRight: 8,
     },
@@ -149,7 +203,7 @@ const styles = StyleSheet.create({
         fontSize: 14,
     },
     button: {
-        backgroundColor: 'orange',
+        backgroundColor: '#99CC6A',
         padding: 10,
         borderRadius: 8,
         marginTop: 20,

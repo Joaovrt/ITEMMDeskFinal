@@ -211,7 +211,7 @@ export default function EditarPerfil({ navigation, route }) {
 
 const styles = StyleSheet.create({
     container: {
-        backgroundColor: '#38a69D',
+        backgroundColor: '#263868',
         flexGrow: 1,
         alignItems: "center",
         justifyContent: "center",
@@ -220,7 +220,7 @@ const styles = StyleSheet.create({
         fontSize: 20,
         fontWeight: "bold",
         marginBottom: 10,
-        color: 'orange'
+        color: '#99CC6A'
     },
     input: {
         backgroundColor: "#f8f8f8",
@@ -233,7 +233,7 @@ const styles = StyleSheet.create({
         borderWidth: 1,
     },
     buttonSend: {
-        backgroundColor: "orange",
+        backgroundColor: "#99CC6A",
         paddingHorizontal: 35,
         paddingVertical: 15,
         borderRadius: 40,
@@ -258,7 +258,7 @@ const styles = StyleSheet.create({
         top: 10,
         left: 10,
         padding: 10,
-        backgroundColor: 'orange',
+        backgroundColor: '#99CC6A',
         borderRadius: 5,
         zIndex: 1 
     },

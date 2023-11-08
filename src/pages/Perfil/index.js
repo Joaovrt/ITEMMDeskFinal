@@ -165,7 +165,7 @@ const styles = StyleSheet.create({
         flex: 1,
         padding: 10,
         paddingTop: 60,
-        backgroundColor: '#38a69d',
+        backgroundColor: '#263868',
     },
     innerContainer: {
         alignItems: 'center',
@@ -236,7 +236,7 @@ const styles = StyleSheet.create({
         top: 10,
         left: 10,
         padding: 10,
-        backgroundColor: 'orange',
+        backgroundColor: '#99CC6A',
         borderRadius: 5,
         zIndex: 1 
     },

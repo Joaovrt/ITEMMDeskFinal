@@ -20,35 +20,35 @@ export default function Chamados() {
                 style={styles.button}
                 onPress={() => navigation.navigate("ChamadosDeHoje")}
             >
-                <Icon name="reorder" size={40} color="orange" />
+                <Icon name="reorder" size={40} color="#99CC6A" />
                 <Text style={styles.title}>Hoje</Text>
             </TouchableOpacity>
             <TouchableOpacity
                 style={styles.button}
                 onPress={() => navigation.navigate("ChamadosAbertos")}
             >
-                <Icon name="reorder" size={40} color="orange" />
+                <Icon name="reorder" size={40} color="#99CC6A" />
                 <Text style={styles.title}>Abertos</Text>
             </TouchableOpacity>
             <TouchableOpacity
                 style={styles.button}
                 onPress={() => navigation.navigate("ChamadosEmAndamento")}
             >
-                <Icon name="reorder" size={40} color="orange" />
+                <Icon name="reorder" size={40} color="#99CC6A" />
                 <Text style={styles.title}>Andamento</Text>
             </TouchableOpacity>
             <TouchableOpacity
                 style={styles.button}
                 onPress={() => navigation.navigate("ChamadosFinalizados")}
             >
-                <Icon name="reorder" size={40} color="orange" />
+                <Icon name="reorder" size={40} color="#99CC6A" />
                 <Text style={styles.title}>Finalizados</Text>
             </TouchableOpacity>
             <TouchableOpacity
                 style={styles.button}
                 onPress={() => navigation.navigate("ChamadosAtrasados")}
             >
-                <Icon name="reorder" size={40} color="orange" />
+                <Icon name="reorder" size={40} color="#99CC6A" />
                 <Text style={styles.title}>Atrasados</Text>
             </TouchableOpacity>
         </View>
@@ -58,7 +58,7 @@ export default function Chamados() {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: "#38a69d",
+        backgroundColor: "#263868",
         alignItems: "center",
         justifyContent: "center",
     },
@@ -84,7 +84,7 @@ const styles = StyleSheet.create({
         top: 10,
         left: 10,
         padding: 10,
-        backgroundColor: 'orange',
+        backgroundColor: '#99CC6A',
         borderRadius: 5,
         zIndex: 1  
     },

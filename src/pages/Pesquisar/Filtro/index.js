@@ -62,7 +62,7 @@ export default function Filtro({ navigation }) {
     if (loading) {
         return (
             <View style={styles.container}>
-                <ActivityIndicator size="large" color="orange" />
+                <ActivityIndicator size="large" color="#99CC6A" />
             </View>
         );
     } else {
@@ -145,7 +145,7 @@ export default function Filtro({ navigation }) {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: "#38a69D",
+        backgroundColor: "#263868",
         paddingTop: 30,
         paddingBottom: 25,
     },
@@ -161,14 +161,14 @@ const styles = StyleSheet.create({
     view: {
         marginLeft: 20,
         marginTop: 5,
-        backgroundColor: "#38a69D",
+        backgroundColor: "#263868",
     },
     departmentText: {
         color: 'black',
         fontSize: 16
     },
     departmentSelected: {
-        backgroundColor: 'orange',
+        backgroundColor: '#99CC6A',
         padding: 10,
         margin: 5,
         borderRadius: 5
@@ -178,7 +178,7 @@ const styles = StyleSheet.create({
         top: 10,
         left: 10,
         padding: 10,
-        backgroundColor: 'orange',
+        backgroundColor: '#99CC6A',
         borderRadius: 5,
         zIndex: 1
     },
@@ -210,7 +210,7 @@ const styles = StyleSheet.create({
     },
     notFoundText: {
         fontSize: 20,
-        color: "orange",
+        color: "#99CC6A",
         fontWeight: "bold",
     },
     dropdownItem: {
@@ -226,7 +226,7 @@ const styles = StyleSheet.create({
         marginTop: 50,
         marginBottom: 5,
         fontSize: 30,
-        color: 'orange',
+        color: '#99CC6A',
         fontWeight: 'bold',
         textAlign: 'center',
     },

@@ -37,7 +37,7 @@ export default function ChamadosFinalizados({ navigation }) {
     if (loading) {
         return (
             <View style={styles.container}>
-                <ActivityIndicator size="large" color="orange" />
+                <ActivityIndicator size="large" color="#99CC6A" />
             </View>
         );
     } else {
@@ -76,7 +76,7 @@ export default function ChamadosFinalizados({ navigation }) {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: "#38a69D",
+        backgroundColor: "#263868",
         paddingTop: 20,
     },
     headerTitle: {
@@ -84,7 +84,7 @@ const styles = StyleSheet.create({
         fontWeight: 'bold',
         textAlign: 'center',
         marginVertical: 15,
-        color: 'orange',
+        color: '#99CC6A',
         marginTop: 60,
     },
     containerFlatlist: {
@@ -113,7 +113,7 @@ const styles = StyleSheet.create({
         top: 10,
         left: 10,
         padding: 10,
-        backgroundColor: 'orange',
+        backgroundColor: '#99CC6A',
         borderRadius: 5,
         zIndex: 1  
     },
