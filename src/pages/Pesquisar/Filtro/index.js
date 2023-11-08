@@ -51,6 +51,7 @@ export default function Filtro({ navigation }) {
         const snapshot = await getDocs(departRef);
 
         const departs = snapshot.docs.map(doc => doc.data().nome);
+        console.log(departs)
         setDepartamentos(departs);
     }
 
@@ -82,7 +83,7 @@ export default function Filtro({ navigation }) {
                     onPress={() => setIsDropdownOpen(!isDropdownOpen)}
                 >
                     <Text style={styles.departmentText}>
-                        {selectedDepartment || "Selecione"}
+                        {selectedDepartment || "Todos"}
                     </Text>
                 </TouchableOpacity>
 
@@ -96,7 +97,7 @@ export default function Filtro({ navigation }) {
                                 setIsDropdownOpen(false);
                             }}
                         >
-                            <Text style={styles.departmentText}>Selecione</Text>
+                            <Text style={styles.departmentText}>Todos</Text>
                         </TouchableOpacity>
                         {departamentos.map(department => (
                             <TouchableOpacity
@@ -159,9 +160,10 @@ const styles = StyleSheet.create({
         borderWidth: 1
     },
     view: {
-        marginLeft: 20,
         marginTop: 5,
         backgroundColor: "#263868",
+        marginLeft:15,
+        marginRight:15,
     },
     departmentText: {
         color: 'black',
@@ -222,7 +224,6 @@ const styles = StyleSheet.create({
         borderWidth: 1
     },
     filterByText: {
-        marginLeft: 20,
         marginTop: 50,
         marginBottom: 5,
         fontSize: 30,

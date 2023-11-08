@@ -9,12 +9,12 @@ export default function Chamados() {
 
     return (
         <View style={styles.container}>
-            <TouchableOpacity 
+            {/* <TouchableOpacity 
                 style={styles.backButton} 
                 onPress={() => navigation.goBack()}
             >
                 <Ionicons name="arrow-back" size={24} color="white" />
-            </TouchableOpacity>
+            </TouchableOpacity> */}
             
             <TouchableOpacity
                 style={styles.button}

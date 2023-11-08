@@ -54,17 +54,17 @@ export default function Pesquisar({ navigation }) {
     } else {
         return (
             <View style={styles.container}>
-                <TouchableOpacity
+                {/* <TouchableOpacity
                     style={styles.backButton}
                     onPress={() => navigation.goBack()}
                 >
                     <Ionicons name="arrow-back" size={24} color="white" />
-                </TouchableOpacity>
+                </TouchableOpacity> */}
                 <SafeAreaView style={styles.view}>
                     <View style={styles.cabecalho}>
                         <TextInput
                             style={styles.input}
-                            placeholder="Pesquisar..."
+                            placeholder="Pesquisar por id..."
                             autoCapitalize="none"
                             autoCorrect={false}
                             value={text}

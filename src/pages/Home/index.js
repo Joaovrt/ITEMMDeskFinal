@@ -121,8 +121,8 @@ export default function Home() {
                 <View style={styles.chartWithYAxis}>
                     <BarChart
                         data={data}
-                        width={Dimensions.get("window").width - 16}
-                        height={220}
+                        width={Dimensions.get("window").width - 30}
+                        height={320}
                         yAxisLabel=""
                         chartConfig={{
                             backgroundColor: 'black',
@@ -168,6 +168,7 @@ const styles = StyleSheet.create({
         fontWeight: 'bold',
         marginBottom: 16,
         alignSelf: 'center',
+        color:'white'
     },
     titleContainer: {
         flexDirection: 'row',
@@ -185,6 +186,7 @@ const styles = StyleSheet.create({
     title: {
         fontSize: 30,
         fontWeight: 'bold',
+        color:'white'
     },
     chartContainer: {
         flexDirection: 'row',
