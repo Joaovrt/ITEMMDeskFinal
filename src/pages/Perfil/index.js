@@ -17,44 +17,49 @@ export default function Perfil({ navigation }) {
     const [userImage, setUserImage] = useState(null);
     const [carregar, setCarregar] = useState(true)
 
+    const checkRoles = async () => {
+        const adminQuery = query(
+            collection(database, "Admin"),
+            where("email", "==", userEmail)
+        );
+        const clientQuery = query(
+            collection(database, "Clientes"),
+            where("email", "==", userEmail)
+        );
+        const atendentQuery = query(
+            collection(database, "Atendentes"),
+            where("email", "==", userEmail)
+        );
+
+        const adminSnapshot = await getDocs(adminQuery);
+        const clientSnapshot = await getDocs(clientQuery);
+        const atendentSnapshot = await getDocs(atendentQuery);
+
+        if (!adminSnapshot.empty) {
+            setIsAdmin(true);
+            setUserName("Conta Admin");
+        } else if (!clientSnapshot.empty) {
+            setIsClient(true);
+            const clientData = clientSnapshot.docs[0]?.data();
+            setUserName(clientData?.nome || "Nome Desconhecido");
+            setUserImage(clientData?.imagem);
+        } else if (!atendentSnapshot.empty) {
+            setIsAtendent(true);
+            const atendentData = atendentSnapshot.docs[0]?.data();
+            setUserName(atendentData?.nome || "Nome Desconhecido");
+            setUserImage(atendentData?.imagem);
+        }
+        setCarregar(false)
+    };
+
     useEffect(() => {
-        const checkRoles = async () => {
-            const adminQuery = query(
-                collection(database, "Admin"),
-                where("email", "==", userEmail)
-            );
-            const clientQuery = query(
-                collection(database, "Clientes"),
-                where("email", "==", userEmail)
-            );
-            const atendentQuery = query(
-                collection(database, "Atendentes"),
-                where("email", "==", userEmail)
-            );
+        const unsubscribe = navigation.addListener('focus', () => {
+            checkRoles(); // Chama a função de busca de dados sempre que a tela está focada
+        });
 
-            const adminSnapshot = await getDocs(adminQuery);
-            const clientSnapshot = await getDocs(clientQuery);
-            const atendentSnapshot = await getDocs(atendentQuery);
-
-            if (!adminSnapshot.empty) {
-                setIsAdmin(true);
-                setUserName("Conta Admin");
-            } else if (!clientSnapshot.empty) {
-                setIsClient(true);
-                const clientData = clientSnapshot.docs[0]?.data();
-                setUserName(clientData?.nome || "Nome Desconhecido");
-                setUserImage(clientData?.imagem);
-            } else if (!atendentSnapshot.empty) {
-                setIsAtendent(true);
-                const atendentData = atendentSnapshot.docs[0]?.data();
-                setUserName(atendentData?.nome || "Nome Desconhecido");
-                setUserImage(atendentData?.imagem);
-            }
-            setCarregar(false)
-        };
-
-        checkRoles();
-    }, [navigation]);
+        // Cleanup da inscrição do evento quando o componente é desmontado
+        return unsubscribe;
+    }, [navigation]); 
 
     function handlerMeusChamados() {
         navigation.navigate("MeusChamados");
@@ -201,7 +206,7 @@ const styles = StyleSheet.create({
     },
     nameText: {
         marginTop: 20,
-        color: 'black',
+        color: 'white',
         fontSize: 30,
         fontWeight: 'bold',
     },

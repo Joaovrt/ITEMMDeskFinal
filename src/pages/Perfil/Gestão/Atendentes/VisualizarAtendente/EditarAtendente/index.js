@@ -5,6 +5,7 @@ import { getFirestore, collection, getDocs, doc, getDoc, setDoc, addDoc, updateD
 import { database } from "../../../../../../config";
 import { Ionicons } from '@expo/vector-icons';
 import * as ImagePicker from 'expo-image-picker';
+import * as Crypto from 'expo-crypto';
 
 export default function EditarAtendente({ navigation, route }) {
     const [nome, setNome] = useState("");
@@ -36,7 +37,6 @@ export default function EditarAtendente({ navigation, route }) {
                     setTelefone(route.params.telefone || "");
                     setCpf(route.params.cpf || "");
                     setDepartamento(route.params.departamento || "");
-                    setSenha(route.params.senha || "");
                     setOriginalNome(route.params.nome || "");
                     setOriginalEmail(route.params.email || "");
                     setOriginalTelefone(route.params.telefone || "");
@@ -66,12 +66,18 @@ export default function EditarAtendente({ navigation, route }) {
     }
 
     function isValidPassword(password) {
+        if(password!=originalSenha && password!=""){
+
+        
         const minLength = 8;
         const hasUpperCase = /[A-Z]/.test(password);
         const hasNumber = /\d/.test(password);
         const hasSpecialChar = /[!@#$%^&*(),.?":{}|<>]/.test(password);
 
         return password.length >= minLength && hasUpperCase && hasNumber && hasSpecialChar;
+    }
+        else
+            return true
     }
 
     function isValidCPF(cpf) {
@@ -133,7 +139,7 @@ export default function EditarAtendente({ navigation, route }) {
             email: email,
             cpf: cpf,
             telefone: telefone,
-            senha: senha,
+            // senha: senha,
             //imagem: imagem,
         };
         for (let item in obj) {
@@ -199,7 +205,17 @@ export default function EditarAtendente({ navigation, route }) {
             att();
         }
     };
-    function att() {
+    async function att() {
+        var senhaToChange
+        if(senha==""||senha==originalSenha)
+            senhaToChange=originalSenha
+        else{
+            const senhaHash = await Crypto.digestStringAsync(
+                Crypto.CryptoDigestAlgorithm.SHA512,
+                senha
+              );
+              senhaToChange=senhaHash
+        }
         const docRef = doc(database, "Atendentes", `${route.params.id}`);
         updateDoc(docRef, {
             nome: nome,
@@ -207,7 +223,7 @@ export default function EditarAtendente({ navigation, route }) {
             telefone: telefone,
             cpf: cpf,
             departamento: departamento,
-            senha: senha,
+            senha: senhaToChange,
             image: imagem
         }).then(() => {
             setCarregar(false)
@@ -309,7 +325,7 @@ export default function EditarAtendente({ navigation, route }) {
                     <Picker.Item key={index} label={depto} value={depto} />
                 ))}
             </Picker>
-            <Text style={styles.label}>Senha</Text>
+            <Text style={styles.label}>Nova Senha (opcional)</Text>
             <TextInput
                 style={styles.input}
                 placeholder="Digite..."

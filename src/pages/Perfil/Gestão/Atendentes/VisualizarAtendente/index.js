@@ -76,8 +76,8 @@ function VisualizarAtendente({ route, navigation }) {
             <Text style={styles.label}>Departamento:</Text>
             <Text style={styles.data}>{departamento}</Text>
 
-            <Text style={styles.label}>Senha:</Text>
-            <Text style={styles.data}>{senha}</Text>
+            {/* <Text style={styles.label}>Senha:</Text>
+            <Text style={styles.data}>{senha}</Text> */}
 
             {!carregar && <TouchableOpacity style={styles.button} onPress={goToEditProfile}>
                 <Text style={styles.buttonText}>Editar Atendente</Text>

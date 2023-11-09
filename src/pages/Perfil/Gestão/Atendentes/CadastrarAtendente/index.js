@@ -6,6 +6,7 @@ import { database } from "../../../../../config";
 import * as ImagePicker from 'expo-image-picker';
 import { Ionicons } from '@expo/vector-icons';
 import { getStorage, ref, uploadBytes, getDownloadURL } from 'firebase/storage';
+import * as Crypto from 'expo-crypto';
 
 export default function CadastrarAtendente({ navigation }) {
     const [nome, setNome] = useState("");
@@ -138,6 +139,14 @@ export default function CadastrarAtendente({ navigation }) {
         }
     };
 
+    const criarHashSenha = async () => {
+        const senhaHash = await Crypto.digestStringAsync(
+          Crypto.CryptoDigestAlgorithm.SHA512,
+          senha
+        );
+        add(senhaHash)
+      };
+
     const uploadImageAndAdd = async () => {
         if (!AllFieldsAreFilled()) {
             Alert.alert("Preencha todos os campos");
@@ -175,15 +184,15 @@ export default function CadastrarAtendente({ navigation }) {
                 setImagem(downloadURL);
 
                 // Agora você pode adicionar os dados do atendente, incluindo a URL da imagem
-                add();
+                criarHashSenha();
             }
         } else {
             // Se nenhuma imagem foi selecionada, você pode adicionar os dados do atendente diretamente
-            add();
+            criarHashSenha();
         }
     };
 
-    const add = () => {
+    const add = (senhaHash) => {
         const dataAtual = Timestamp.now();
 
         console.log("Adicionando documento ao Firestore...");
@@ -194,7 +203,7 @@ export default function CadastrarAtendente({ navigation }) {
             departamento: departamento,
             cpf: cpf,
             telefone: telefone,
-            senha: senha,
+            senha: senhaHash,
             registro: "Atendente",
             imagem: imagem, // Inclua a URL da imagem aqui
         })

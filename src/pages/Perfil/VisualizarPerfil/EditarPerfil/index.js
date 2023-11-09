@@ -5,6 +5,7 @@ import { getStorage, ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { database } from "../../../../config";
 import * as ImagePicker from 'expo-image-picker'; // Importe o ImagePicker
 import { Ionicons } from '@expo/vector-icons';
+import * as Crypto from 'expo-crypto';
 
 export default function EditarPerfil({ navigation, route }) {
     const [nome, setNome] = useState("");
@@ -33,12 +34,18 @@ export default function EditarPerfil({ navigation, route }) {
     }
 
     function isValidPassword(password) {
+        if(password!=originalSenha && password!=""){
+
+        
         const minLength = 8;
         const hasUpperCase = /[A-Z]/.test(password);
         const hasNumber = /\d/.test(password);
         const hasSpecialChar = /[!@#$%^&*(),.?":{}|<>]/.test(password);
 
         return password.length >= minLength && hasUpperCase && hasNumber && hasSpecialChar;
+    }
+        else
+            return true
     }
 
     function isValidCPF(cpf) {
@@ -99,7 +106,7 @@ export default function EditarPerfil({ navigation, route }) {
             email: email,
             cpf: cpf,
             telefone: telefone,
-            senha: senha
+            //senha: senha
         };
         for (let item in obj) {
             if (!obj[item]) {
@@ -166,13 +173,24 @@ export default function EditarPerfil({ navigation, route }) {
         }
     };
 
-    function att() {
+    async function att() {
+        var senhaToChange
+        if(senha==""||senha==originalSenha)
+            senhaToChange=undefined
+        else{
+            const senhaHash = await Crypto.digestStringAsync(
+                Crypto.CryptoDigestAlgorithm.SHA512,
+                senha
+              );
+              senhaToChange=senhaHash
+        }
+            
         const updatedFields = {
             nome: nome !== originalNome ? nome : undefined,
             email: email !== originalEmail ? email : undefined,
             telefone: telefone !== originalTelefone ? telefone : undefined,
             cpf: cpf !== originalCpf ? cpf : undefined,
-            senha: senha !== originalSenha ? senha : undefined,
+            senha: senhaToChange,
             imagem: imagem 
         };
     
@@ -198,7 +216,6 @@ export default function EditarPerfil({ navigation, route }) {
             setEmail(route.params.email || "");
             setTelefone(route.params.telefone || "");
             setCpf(route.params.cpf || "");
-            setSenha(route.params.senha || "");
             setOriginalNome(route.params.nome || "");
             setOriginalEmail(route.params.email || "");
             setOriginalTelefone(route.params.telefone || "");
@@ -278,7 +295,7 @@ export default function EditarPerfil({ navigation, route }) {
                 />
           <Text style={styles.label}>CPF</Text>
           <TextInput style={styles.input} placeholder="Digite..." onChangeText={handleCpfChange} value={cpf} keyboardType="numeric" maxLength={14}/>
-          <Text style={styles.label}>Senha</Text>
+          <Text style={styles.label}>Nova Senha (opcional)</Text>
           <TextInput
                     style={styles.input}
                     placeholder="Digite..."

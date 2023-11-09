@@ -6,6 +6,7 @@ import { collection, getDocs, query, where } from 'firebase/firestore';
 import { database } from "../../config";
 import { useUser } from '../../contexts/UserContext';
 import { Ionicons } from '@expo/vector-icons';
+import * as Crypto from 'expo-crypto';
 
 export default function SignIn() {
     const navigation = useNavigation();
@@ -16,16 +17,20 @@ export default function SignIn() {
 
     const handleSignIn = async () => {
         setCarregar(true)
+        const senhaHash = await Crypto.digestStringAsync(
+              Crypto.CryptoDigestAlgorithm.SHA512,
+              password
+        );
         const clientQuery = query(
             collection(database, "Clientes"),
             where("email", "==", email),
-            where("senha", "==", password)
+            where("senha", "==", senhaHash)
         );
 
         const attendantQuery = query(
             collection(database, "Atendentes"),
             where("email", "==", email),
-            where("senha", "==", password)
+            where("senha", "==", senhaHash)
         );
 
         const adminQuery = query(

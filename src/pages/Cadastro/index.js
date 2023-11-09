@@ -5,6 +5,7 @@ import { database } from "../../config";
 import * as ImagePicker from 'expo-image-picker';
 import { Ionicons } from '@expo/vector-icons';
 import { getStorage, ref, uploadBytes, getDownloadURL } from 'firebase/storage';
+import * as Crypto from 'expo-crypto';
 
 export default function Cadastro({ navigation }) {
     const [nome, setNome] = useState("");
@@ -42,6 +43,14 @@ export default function Cadastro({ navigation }) {
         }
     };
 
+    const criarHashSenha = async (url) => {
+        const senhaHash = await Crypto.digestStringAsync(
+          Crypto.CryptoDigestAlgorithm.SHA512,
+          senha
+        );
+        add(url,senhaHash)
+      };
+
     const uploadImageAndAdd = async () => {
         if (!AllFieldsAreFilled()) {
             Alert.alert("Preencha todos os campos");
@@ -76,7 +85,7 @@ export default function Cadastro({ navigation }) {
             const downloadURL = await getDownloadURL(storageRef);
 
             // Continue com a adição do documento ao Firebase Firestore, usando a URL de download
-            add(downloadURL);
+            criarHashSenha(downloadURL)
         } catch (error) {
             setCarregar(false)
             console.error("Erro ao fazer o upload da imagem:", error);
@@ -84,7 +93,7 @@ export default function Cadastro({ navigation }) {
         }
     };
 
-    const add = (imagemURL) => {
+    const add = (imagemURL,hash) => {
         const dataAtual = Timestamp.now();
 
         console.log("Adicionando documento ao Firestore...");
@@ -94,7 +103,7 @@ export default function Cadastro({ navigation }) {
             email: email,
             cpf: cpf,
             telefone: telefone,
-            senha: senha,
+            senha: hash,
             registro: "Cliente",
             imagem: imagemURL,  // Use a URL da imagem aqui
         })
@@ -294,7 +303,6 @@ export default function Cadastro({ navigation }) {
                     </TouchableOpacity>
                 }
                 {carregar && <ActivityIndicator style={{marginTop:'5%'}} size="large" color="#FFFFFF" />}
-
             </View>
         </ScrollView>
     );

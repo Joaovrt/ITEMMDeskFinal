@@ -29,6 +29,8 @@ function VisualizarPerfil({ route, navigation }) {
         fetchClienteInfo();
     }, [id]);
 
+    
+
     const goToEditPerfil = () => {
         navigation.navigate('EditarPerfil', {
             id: id,
@@ -62,8 +64,8 @@ function VisualizarPerfil({ route, navigation }) {
                 <Text style={styles.label}>Telefone:</Text>
                 <Text style={styles.data}>{clienteInfo?.telefone}</Text>
     
-                <Text style={styles.label}>Senha:</Text>
-                <Text style={styles.data}>{clienteInfo?.senha}</Text>
+                {/* <Text style={styles.label}>Senha:</Text>
+                <Text style={styles.data}>{clienteInfo?.senha}</Text> */}
     
                 <Image 
                     source={{ uri: clienteInfo?.imagem }} 
