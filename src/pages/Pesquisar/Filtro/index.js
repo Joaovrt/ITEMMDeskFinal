@@ -51,7 +51,6 @@ export default function Filtro({ navigation }) {
         const snapshot = await getDocs(departRef);
 
         const departs = snapshot.docs.map(doc => doc.data().nome);
-        console.log(departs)
         setDepartamentos(departs);
     }
 
@@ -59,6 +58,15 @@ export default function Filtro({ navigation }) {
         loadDepartments();
         getDados();
     }, [selectedDepartment]);
+
+    useEffect(() => {
+        const unsubscribe = navigation.addListener('focus', () => {
+            getDados(); // Chama a função de busca de dados sempre que a tela está focada
+        });
+
+        // Cleanup da inscrição do evento quando o componente é desmontado
+        return unsubscribe;
+    }, [navigation]); 
 
     if (loading) {
         return (

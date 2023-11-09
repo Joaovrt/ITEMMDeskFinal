@@ -34,8 +34,13 @@ export default function Atendentes({ navigation }) {
     }
 
     useEffect(() => {
-        getDados()
-    }, [])
+        const unsubscribe = navigation.addListener('focus', () => {
+            getDados(); // Chama a função de busca de dados sempre que a tela está focada
+        });
+
+        // Cleanup da inscrição do evento quando o componente é desmontado
+        return unsubscribe;
+    }, [navigation]); 
 
     if (loading) {
         return (

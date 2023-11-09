@@ -17,6 +17,7 @@ export default function EditarChamados({ navigation, route }) {
     const [departamentos, setDepartamentos] = useState([]);
     const [categorias, setCategorias] = useState([]);
     const [atendentes, setAtendentes] = useState([]);
+    const [carregar, setCarregar] = useState(false);
 
     useEffect(() => {
         if (departamento) {
@@ -34,31 +35,31 @@ export default function EditarChamados({ navigation, route }) {
     }, [departamento]);
 
     useEffect(() => {
-        if (route.params) {
-            setDepartamento(route.params.departamento || "");
-            setCategoria(route.params.categoria || "");
-            setAssunto(route.params.assunto || "");
-            setPrioridade(route.params.prioridade || "");
-            setPrazo(route.params.prazo || "");
-            setDescricao(route.params.descricao || "");
-            setStatus(route.params.status || "");
-            setAtendente(route.params.atribuido || ""); 
+        const fetchData = async () => {
+            try {
+                const deptoData = await getDocs(collection(database, "Departamento"));
+                const deptos = deptoData.docs.map(doc => doc.data().nome);
+                setDepartamentos(deptos);
 
-            const fetchData = async () => {
-                try {
-                    const deptoData = await getDocs(collection(database, "Departamento"));
-                    const deptos = deptoData.docs.map(doc => doc.data().nome);
-                    setDepartamentos(deptos);
+                const catData = await getDocs(collection(database, "Categoria"));
+                const cats = catData.docs.map(doc => doc.data().nome);
+                setCategorias(cats);
 
-                    const catData = await getDocs(collection(database, "Categoria"));
-                    const cats = catData.docs.map(doc => doc.data().nome);
-                    setCategorias(cats);
-                } catch (error) {
-                    console.error("Erro ao carregar dados:", error);
+                if (route.params) {
+                    setDepartamento(route.params.departamento);
+                    setCategoria(route.params.categoria);
+                    setAssunto(route.params.assunto);
+                    setPrioridade(route.params.prioridade);
+                    setPrazo(route.params.prazo);
+                    setDescricao(route.params.descricao);
+                    setStatus(route.params.status);
+                    setAtendente(route.params.atribuido);
                 }
+            } catch (error) {
+                console.error("Erro ao carregar dados:", error);
             }
-            fetchData();
         }
+            fetchData();
     }, []);
 
     function AllFieldsAreFilled() {
@@ -70,7 +71,7 @@ export default function EditarChamados({ navigation, route }) {
             prazo: prazo,
             descricao: descricao,
             status: status,
-            
+
         };
         for (let item in obj) {
             if (!obj[item]) {
@@ -89,8 +90,9 @@ export default function EditarChamados({ navigation, route }) {
             window.alert("Preencha todos os campos");
             return;
         }
+        setCarregar(true)
         const docRef = doc(database, "Chamados", `${route.params.id}`);
-    
+
         const updateData = {
             departamento: departamento,
             categoria: categoria,
@@ -101,30 +103,30 @@ export default function EditarChamados({ navigation, route }) {
             status: status,
             atribuido: atendente
         };
-        
+
         if (status === "Finalizado") {
             updateData.dataFinalizacao = Timestamp.now();
         }
-    
+
         updateDoc(docRef, updateData);
-    
-        navigation.navigate("Chamados");
+        setCarregar(false)
+        navigation.pop(2);
     }
 
     return (
-        <ScrollView 
-    style={{ flex: 1, backgroundColor: "#263868" }} 
-    keyboardShouldPersistTaps="handled"
-    >
+        <ScrollView
+            style={{ flex: 1, backgroundColor: "#263868" }}
+            keyboardShouldPersistTaps="handled"
+        >
 
-      <View style={styles.container}>
-        <TouchableOpacity 
-                style={styles.backButton} 
-                onPress={() => navigation.goBack()}
-            >
-                <Ionicons name="arrow-back" size={24} color="white" />
-            </TouchableOpacity>
-          <Text style={styles.label}>Departamento</Text>
+            <View style={styles.container}>
+                <TouchableOpacity
+                    style={styles.backButton}
+                    onPress={() => navigation.goBack()}
+                >
+                    <Ionicons name="arrow-back" size={24} color="white" />
+                </TouchableOpacity>
+                <Text style={styles.label}>Departamento</Text>
                 <Picker selectedValue={departamento} style={styles.picker} onValueChange={(itemValue) => setDepartamento(itemValue)}>
                     <Picker.Item label="Selecione" value="" />
                     {departamentos.map((depto, index) => (
@@ -163,12 +165,12 @@ export default function EditarChamados({ navigation, route }) {
                 <Picker selectedValue={atendente} style={styles.picker} onValueChange={(itemValue) => setAtendente(itemValue)}>
                     <Picker.Item label="Selecione o atendente" value="" />
                     {atendentes.map((atd, index) => (
-                    <Picker.Item key={index} label={atd} value={atd} />
+                        <Picker.Item key={index} label={atd} value={atd} />
                     ))}
                 </Picker>
                 <Text style={styles.label}>Status</Text>
                 {atendente === "" && (
-                <Text style={{color: 'red', marginBottom: 5}}>Atribua a alguém antes de alterar o status.</Text>
+                    <Text style={{ color: 'red', marginBottom: 5 }}>Atribua a alguém antes de alterar o status.</Text>
                 )}
                 <Picker
                     selectedValue={status}
@@ -183,76 +185,80 @@ export default function EditarChamados({ navigation, route }) {
                     <Picker.Item label="Atrasado" value="Atrasado" />
                 </Picker>
 
-          <TouchableOpacity style={styles.buttonSend} onPress={att}>
-              <Text style={styles.buttonText}>Confirmar </Text>
-          </TouchableOpacity>
-      </View>
-      </ScrollView>
-  
-)
+                {!carregar && <TouchableOpacity style={styles.buttonSend} onPress={att}>
+                    <Text style={styles.buttonText}>Confirmar </Text>
+                </TouchableOpacity>}
+                {
+                    carregar &&
+                    <ActivityIndicator size="large" color="#99CC6A" />
+                }
+            </View>
+        </ScrollView>
+
+    )
 }
 
 const styles = StyleSheet.create({
 
-  container: {
-      flexGrow: 1,
-      backgroundColor: "#263868",
-      alignItems: "center",
-      justifyContent: "center",
-      paddingTop: 70,  
-      paddingBottom: 60,
-  },
-  label: {
-      fontSize: 20,
-      fontWeight: "bold",
-      marginBottom: 5,
-      color: '#99CC6A'
-  },
-  input: {
-      backgroundColor: "#f8f8f8",
-      width: "80%",
-      padding: 10,
-      borderRadius: 10,
-      color: "#000",
-      marginBottom: 1,
-      borderColor: "#c7c7c7",
-      borderWidth: 2,
-      borderWidth: 0,
-  },
-  buttonSend: {
-      backgroundColor: "#99CC6A",
-      paddingHorizontal: 20,
-      paddingVertical: 10,
-      borderRadius: 30,
-      marginTop: 5,
-  },
-  buttonText: {
-      color: "#ffffff",
-      fontWeight: "bold",
-     
-  },
-  picker: {
-      backgroundColor: "#f8f8f8",
-      width: "80%",
-      padding: 10,
-      borderRadius: 10,
-      color: "#000",
-      marginBottom: 1,
-      borderColor: "#c7c7c7",
-      borderWidth: 2,
-      borderWidth: 0,
-  },
-  backButton: {
-    position: 'absolute',
-    top: 10,
-    left: 10,
-    padding: 10,
-    backgroundColor: '#99CC6A',
-    borderRadius: 5,
-    zIndex: 1, 
-},
-backButtonText: {
-    color: '#ffffff',
-    fontWeight: "bold"
-}
+    container: {
+        flexGrow: 1,
+        backgroundColor: "#263868",
+        alignItems: "center",
+        justifyContent: "center",
+        paddingTop: 70,
+        paddingBottom: 60,
+    },
+    label: {
+        fontSize: 20,
+        fontWeight: "bold",
+        marginBottom: 5,
+        color: '#99CC6A'
+    },
+    input: {
+        backgroundColor: "#f8f8f8",
+        width: "80%",
+        padding: 10,
+        borderRadius: 10,
+        color: "#000",
+        marginBottom: 1,
+        borderColor: "#c7c7c7",
+        borderWidth: 2,
+        borderWidth: 0,
+    },
+    buttonSend: {
+        backgroundColor: "#99CC6A",
+        paddingHorizontal: 20,
+        paddingVertical: 10,
+        borderRadius: 30,
+        marginTop: 5,
+    },
+    buttonText: {
+        color: "#ffffff",
+        fontWeight: "bold",
+
+    },
+    picker: {
+        backgroundColor: "#f8f8f8",
+        width: "80%",
+        padding: 10,
+        borderRadius: 10,
+        color: "#000",
+        marginBottom: 1,
+        borderColor: "#c7c7c7",
+        borderWidth: 2,
+        borderWidth: 0,
+    },
+    backButton: {
+        position: 'absolute',
+        top: 10,
+        left: 10,
+        padding: 10,
+        backgroundColor: '#99CC6A',
+        borderRadius: 5,
+        zIndex: 1,
+    },
+    backButtonText: {
+        color: '#ffffff',
+        fontWeight: "bold"
+    }
 });

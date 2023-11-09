@@ -1,11 +1,13 @@
-import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Alert, ScrollView } from 'react-native';
+import React, { useState } from 'react';
+import { View, Text, StyleSheet, TouchableOpacity, Alert, ScrollView, ActivityIndicator } from 'react-native';
 import { deleteDoc, doc } from 'firebase/firestore';
 import { database } from "../../../../../config";
 import { Ionicons } from '@expo/vector-icons';
 
 function VisualizarAtendente({ route, navigation }) {
     const { id, nome, telefone, email, cpf, departamento, senha, imagem } = route.params;
+
+    const [carregar, setCarregar] = useState(false)
 
     const goToEditProfile = () => {
         navigation.navigate('EditarAtendente', {
@@ -29,13 +31,16 @@ function VisualizarAtendente({ route, navigation }) {
                     text: "Cancelar",
                     style: "cancel"
                 },
-                { 
-                    text: "Confirmar", 
+                {
+                    text: "Confirmar",
                     onPress: async () => {
+                        setCarregar(true)
                         try {
                             await deleteDoc(doc(database, 'Atendentes', id));
-                            navigation.navigate('Gestão');
+                            setCarregar(false)
+                            navigation.goBack();
                         } catch (error) {
+                            setCarregar(false)
                             console.error("Erro ao excluir o atendente: ", error);
                         }
                     }
@@ -46,13 +51,13 @@ function VisualizarAtendente({ route, navigation }) {
 
     return (
         <ScrollView contentContainerStyle={styles.contentContainer}>
-            <TouchableOpacity 
-                style={styles.backButton} 
+            <TouchableOpacity
+                style={styles.backButton}
                 onPress={() => navigation.goBack()}
             >
                 <Ionicons name="arrow-back" size={24} color="white" />
             </TouchableOpacity>
-            
+
             <Text style={styles.label}>Nome:</Text>
             <Text style={styles.data}>{nome}</Text>
 
@@ -74,12 +79,15 @@ function VisualizarAtendente({ route, navigation }) {
             <Text style={styles.label}>Senha:</Text>
             <Text style={styles.data}>{senha}</Text>
 
-            <TouchableOpacity style={styles.button} onPress={goToEditProfile}>
+            {!carregar && <TouchableOpacity style={styles.button} onPress={goToEditProfile}>
                 <Text style={styles.buttonText}>Editar Atendente</Text>
-            </TouchableOpacity>
-            <TouchableOpacity style={styles.buttonex} onPress={() => handleDelete(id)}>
+            </TouchableOpacity>}
+            {!carregar && <TouchableOpacity style={styles.buttonex} onPress={() => handleDelete(id)}>
                 <Text style={styles.buttonText}>Excluir</Text>
-            </TouchableOpacity>
+            </TouchableOpacity>}
+            {carregar &&
+                <ActivityIndicator size="large" color="#99CC6A" />
+            }
         </ScrollView>
     );
 }
@@ -88,11 +96,12 @@ const styles = StyleSheet.create({
     container: {
         flex: 1,
         padding: 20,
-        paddingTop: 70,  
+        paddingTop: 70,
         paddingBottom: 60,
         backgroundColor: "#263868"
     },
     contentContainer: {
+        flex:1,
         padding: 20,
         paddingTop: 70,
         paddingBottom: 60,
@@ -109,11 +118,11 @@ const styles = StyleSheet.create({
         marginTop: 1,
         marginBottom: 5,
         color: "#222",
-        backgroundColor: "#E0E0E0",  
-        padding: 5,  
-        borderRadius: 5, 
-        borderWidth: 0.5,  
-        borderColor: "#777"  
+        backgroundColor: "#E0E0E0",
+        padding: 5,
+        borderRadius: 5,
+        borderWidth: 0.5,
+        borderColor: "#777"
     },
     button: {
         marginTop: 20,
@@ -143,7 +152,7 @@ const styles = StyleSheet.create({
         padding: 10,
         backgroundColor: '#99CC6A',
         borderRadius: 5,
-        zIndex: 1  
+        zIndex: 1
     },
     backButtonText: {
         color: '#ffffff',

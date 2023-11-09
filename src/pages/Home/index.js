@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { View, StyleSheet, Dimensions, Text, TouchableOpacity } from "react-native";
+import { View, StyleSheet, Dimensions, Text, TouchableOpacity, ActivityIndicator } from "react-native";
 import { BarChart } from 'react-native-chart-kit';
 import { getFirestore, collection, onSnapshot, query, where, getDocs } from 'firebase/firestore';
 import * as XLSX from 'xlsx';
@@ -16,6 +16,7 @@ export default function Home() {
     });
 
     const [yAxisValues, setYAxisValues] = useState([0, 3, 5, 10, 15]);
+    const [carregar,setCarregar]=useState(true)
 
     const updateData = async () => {
         const collecRef = collection(database, 'Chamados');
@@ -35,6 +36,8 @@ export default function Home() {
             labels: ["Abertos", "Em Andamento", "Atrasados", "Finalizados"],
             datasets: [{ data: [abertos, emAndamento, atrasados, finalizados] }]
         });
+
+        setCarregar(false)
     };
 
 
@@ -48,7 +51,6 @@ export default function Home() {
 
 
     const generateExcel = async () => {
-        console.log("entrie")
         try {
             const querySnapshot = await getDocs(collection(database, 'Chamados'));
             const temp = [];
@@ -91,6 +93,7 @@ export default function Home() {
 
 
     useEffect(() => {
+
         const unsubscribe = onSnapshot(collection(database, 'Chamados'), () => {
             updateData();
         });
@@ -117,7 +120,8 @@ export default function Home() {
                 <View style={styles.bullet} />
                 <Text style={styles.title}>Gráfico geral de chamados</Text>
             </View>
-            <View style={styles.chartContainer}>
+            {carregar && <ActivityIndicator style={{marginTop:'5%'}} size="large" color="#99CC6A" />}
+            {!carregar && <View style={styles.chartContainer}>
                 <View style={styles.chartWithYAxis}>
                     <BarChart
                         data={data}
@@ -147,7 +151,7 @@ export default function Home() {
                         ))}
                     </View>
                 </View>
-            </View>
+            </View>}
             <TouchableOpacity style={styles.button} onPress={generateExcel}>
                 <Text style={[styles.buttonText, { fontWeight: 'bold' }]}>Emitir Relatório Excel</Text>
             </TouchableOpacity>

@@ -101,6 +101,8 @@ function PesquisarStack() {
     <Stack.Navigator>
       <Stack.Screen name="Pesquisar" component={Pesquisar} options={{ headerShown: false }} />
       <Stack.Screen name="Filtro" component={Filtro} options={{ headerShown: false }} />
+      <Stack.Screen name="VisualizarChamados" component={VisualizarChamados} options={{ headerShown: false }} />
+      <Stack.Screen name="EditarChamados" component={EditarChamados} options={{ headerShown: false }} />
     </Stack.Navigator>
   );
 }
