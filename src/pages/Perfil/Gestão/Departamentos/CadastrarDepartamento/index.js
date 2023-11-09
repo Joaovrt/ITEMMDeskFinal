@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { View, Text, TextInput, TouchableOpacity, StyleSheet } from "react-native";
+import { View, Text, TextInput, TouchableOpacity, StyleSheet,ActivityIndicator, Alert } from "react-native";
 import { Ionicons } from '@expo/vector-icons';
 import { database } from "../../../../../config"
 import { getFirestore, collection, getDocs, doc, getDoc, setDoc, addDoc } from 'firebase/firestore'
@@ -7,6 +7,7 @@ import { getFirestore, collection, getDocs, doc, getDoc, setDoc, addDoc } from '
 export default function CadastrarDepartamento({ navigation }) {
 
     const [nome, setNome] = useState("");
+    const [carregar,setCarregar]=useState(false)
 
     function AllFieldsAreFilled() {
         let obj = {
@@ -16,8 +17,8 @@ export default function CadastrarDepartamento({ navigation }) {
             if (obj[item] == null || obj[item] == "" || obj[item] == undefined) {
                 return false;
             }
-            else return true;
         }
+        return true
     }
 
     function add() {
@@ -25,10 +26,13 @@ export default function CadastrarDepartamento({ navigation }) {
             window.alert("Preencha o campo solicitado!");
             return;
         } else {
+            setCarregar(true)
             addDoc(collection(database, "Departamento"), {
                 nome: nome,
-            });
-            navigation.navigate("Gestão");
+            }).then(()=>{
+            setCarregar(false)
+            navigation.goBack()}).catch(()=>{ setCarregar(false), Alert.alert("Erro ao criar departamento. Tente novamente.")})
+            
         }
     }
 
@@ -49,9 +53,12 @@ export default function CadastrarDepartamento({ navigation }) {
                     onChangeText={setNome}
                     value={nome}
                 />
-                <TouchableOpacity style={styles.buttonSend} onPress={add}>
+                {!carregar && <TouchableOpacity style={styles.buttonSend} onPress={add}>
                     <Text style={styles.buttonText}>Criar</Text>
-                </TouchableOpacity>
+                </TouchableOpacity>}
+                {carregar && 
+                <ActivityIndicator style={{marginTop:5}} size="large" color="#99CC6A" />
+                }
             </View>
 
         </View>

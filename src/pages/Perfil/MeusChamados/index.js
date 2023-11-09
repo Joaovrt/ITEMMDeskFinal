@@ -15,7 +15,7 @@ export default function MeusChamados({ navigation }) {
 
     async function getDados() {
         setLoading(true);
-    
+        var isAtendenteTemp = false
         try {
             const collecRef = collection(database, 'Chamados');
             let listaChamadosAtendente = [];
@@ -28,6 +28,7 @@ export default function MeusChamados({ navigation }) {
     
             if (!atendenteSnapshot.empty) {
                 setIsAtendente(true);
+                isAtendenteTemp=true
                 const atendenteData = atendenteSnapshot.docs[0].data();
                 const atendenteNome = atendenteData.nome || null;
     
@@ -57,6 +58,7 @@ export default function MeusChamados({ navigation }) {
                 }
             } else {
                 setIsAtendente(false);
+                isAtendenteTemp=false
                 const clienteRef = collection(database, "Clientes");
                 const clienteQuery = query(clienteRef, where("email", "==", userEmail));
                 const clienteSnapshot = await getDocs(clienteQuery);
@@ -79,9 +81,8 @@ export default function MeusChamados({ navigation }) {
                     }
                 }
             }
-    
             setChamados(listaChamadosAtendente); // Chamados atribuídos ao atendente
-            setChamadosAbertos(isAtendente ? listaChamadosAbertosAtendente : listaChamadosCliente); // Chamados abertos pelo atendente ou pelo cliente
+            setChamadosAbertos(isAtendenteTemp ? listaChamadosAbertosAtendente : listaChamadosCliente); // Chamados abertos pelo atendente ou pelo cliente
     
         } catch (error) {
             console.error("Erro ao buscar chamados:", error);
@@ -91,8 +92,13 @@ export default function MeusChamados({ navigation }) {
     }
 
     useEffect(() => {
-        getDados();
-    }, []);
+        const unsubscribe = navigation.addListener('focus', () => {
+            getDados(); // Chama a função de busca de dados sempre que a tela está focada
+        });
+
+        // Cleanup da inscrição do evento quando o componente é desmontado
+        return unsubscribe;
+    }, [navigation]); 
 
     if (loading) {
         return (

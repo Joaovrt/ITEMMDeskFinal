@@ -54,7 +54,7 @@ export default function Perfil({ navigation }) {
         };
 
         checkRoles();
-    }, []);
+    }, [navigation]);
 
     function handlerMeusChamados() {
         navigation.navigate("MeusChamados");

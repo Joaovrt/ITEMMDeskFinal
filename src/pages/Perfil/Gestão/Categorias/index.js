@@ -32,10 +32,12 @@ export default function Categorias({ navigation }) {
                 { 
                     text: "OK", 
                     onPress: async () => {
+                        setLoading(true);
                         try {
                             await deleteDoc(doc(database, 'Categoria', id));
                             getDados();
                         } catch (error) {
+                            setLoading(false);
                             console.error("Erro ao excluir a categoria: ", error);
                         }
                     } 
@@ -46,8 +48,13 @@ export default function Categorias({ navigation }) {
     }
 
     useEffect(() => {
-        getDados();
-    }, []);
+        const unsubscribe = navigation.addListener('focus', () => {
+            getDados(); // Chama a função de busca de dados sempre que a tela está focada
+        });
+
+        // Cleanup da inscrição do evento quando o componente é desmontado
+        return unsubscribe;
+    }, [navigation]); 
 
     if (loading) {
         return (

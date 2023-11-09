@@ -92,6 +92,8 @@ function PerfilStack() {
       <Stack.Screen name="ListaClientes" component={ListaClientes} options={{ headerShown: false }} />
       <Stack.Screen name="VisualizarPerfil" component={VisualizarPerfil} options={{ headerShown: false }} />
       <Stack.Screen name="EditarPerfil" component={EditarPerfil} options={{ headerShown: false }} />
+      <Stack.Screen name="VisualizarChamados" component={VisualizarChamados} options={{ headerShown: false }} />
+      <Stack.Screen name="EditarChamados" component={EditarChamados} options={{ headerShown: false }} />
     </Stack.Navigator>
   );
 }

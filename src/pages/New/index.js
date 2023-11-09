@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from "react";
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, ScrollView } from "react-native";
+import { View, Text, TextInput, TouchableOpacity, StyleSheet, ScrollView, ActivityIndicator, Alert } from "react-native";
 import { Picker } from '@react-native-picker/picker';
 import { database } from "../../config";
 import { getFirestore, collection, getDocs, doc, getDoc, setDoc, addDoc, Timestamp, query, where } from 'firebase/firestore';
-import { useUser } from '../../contexts/UserContext'; 
+import { useUser } from '../../contexts/UserContext';
 import { Ionicons } from '@expo/vector-icons';
 
 
@@ -22,6 +22,7 @@ export default function New({ navigation }) {
     const { userEmail } = useUser();
     const [isAtendente, setIsAtendente] = useState(false);
     const [atendenteName, setAtendenteName] = useState('');
+    const [carregar, setCarregar] = useState(false)
 
     const getNumberOfChamados = async () => {
         try {
@@ -29,7 +30,7 @@ export default function New({ navigation }) {
             return chamadosSnapshot.size;
         } catch (error) {
             console.error("Erro ao obter número de chamados:", error);
-            return 0; 
+            return 0;
         }
     }
 
@@ -79,11 +80,11 @@ export default function New({ navigation }) {
             prazo: prazo,
             descricao: descricao
         };
-        
+
         if (isAtendente) {
             delete obj.cliente;
         }
-    
+
         return Object.values(obj).every(value => value);
     }
 
@@ -104,14 +105,15 @@ export default function New({ navigation }) {
                 window.alert("Preencha todos os campos");
                 return;
             } else {
+                setCarregar(true)
                 const dataAtual = Timestamp.now();
                 const tipoChamado = isAtendente ? 'Interno' : 'Externo';
                 const counterDocRef = doc(database, "Config", "chamadosCounter");
                 const counterSnapshot = await getDoc(counterDocRef);
                 let currentId = counterSnapshot.exists ? counterSnapshot.data().currentId : 0;
-    
+
                 currentId += 1;
-    
+
                 let chamadoData = {
                     identificador: currentId,
                     intouext: tipoChamado,
@@ -126,16 +128,16 @@ export default function New({ navigation }) {
                     status: "Aberto",
                     dataCriacao: dataAtual
                 };
-    
+
                 if (isAtendente) {
                     chamadoData.atendente = atendenteName;
                 }
-    
+
                 await addDoc(collection(database, "Chamados"), chamadoData);
                 await setDoc(counterDocRef, { currentId: currentId });
-    
+
                 resetFields();
-    
+                setCarregar(false)
                 if (isAtendente) {
                     navigation.navigate("Home");
                 } else {
@@ -144,18 +146,19 @@ export default function New({ navigation }) {
             }
         } catch (error) {
             console.error("Erro ao adicionar chamado:", error);
+            Alert.alert("Erro ao criar chamado")
         }
     };
 
     return (
-        <ScrollView style={{flex: 1, backgroundColor: "#263868"}}>
+        <ScrollView style={{ flex: 1, backgroundColor: "#263868" }}>
             <View style={styles.container}>
-            <TouchableOpacity 
-                style={styles.backButton} 
-                onPress={() => navigation.goBack()}
-            >
-                <Ionicons name="arrow-back" size={24} color="white" />
-            </TouchableOpacity>
+                <TouchableOpacity
+                    style={styles.backButton}
+                    onPress={() => navigation.goBack()}
+                >
+                    <Ionicons name="arrow-back" size={24} color="white" />
+                </TouchableOpacity>
                 <Text style={styles.label}>Departamento</Text>
                 <Picker selectedValue={departamento} style={styles.picker} onValueChange={(itemValue) => setDepartamento(itemValue)}>
                     <Picker.Item label="Selecione" value="" />
@@ -190,9 +193,12 @@ export default function New({ navigation }) {
                 </Picker>
                 <Text style={styles.label}>Descrição</Text>
                 <TextInput style={styles.input} placeholder="Digite sua descrição!" onChangeText={setDescricao} value={descricao} />
-                <TouchableOpacity style={styles.buttonSend} onPress={add}>
+                {!carregar && <TouchableOpacity style={styles.buttonSend} onPress={add}>
                     <Text style={styles.buttonText}>Criar Chamado</Text>
-                </TouchableOpacity>
+                </TouchableOpacity>}
+                {carregar &&
+                    <ActivityIndicator size="large" color="#99CC6A" />
+                }
             </View>
         </ScrollView>
     );
@@ -203,7 +209,7 @@ const styles = StyleSheet.create({
         flexGrow: 1,
         alignItems: "center",
         justifyContent: "center",
-        paddingTop: 70,  
+        paddingTop: 70,
         paddingBottom: 60,
     },
     label: {
@@ -250,7 +256,7 @@ const styles = StyleSheet.create({
         padding: 10,
         backgroundColor: '#99CC6A',
         borderRadius: 5,
-        zIndex: 1  
+        zIndex: 1
     },
     backButtonText: {
         color: '#ffffff',

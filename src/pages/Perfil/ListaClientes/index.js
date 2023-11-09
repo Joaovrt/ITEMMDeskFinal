@@ -21,10 +21,12 @@ export default function ListaClientes({ navigation }) {
     }
 
     async function handleDelete(id) {
+        setLoading(true)
         try {
             await deleteDoc(doc(database, 'Clientes', id));
             getDados();
         } catch (error) {
+            setLoading(false)
             console.error("Erro ao excluir o cliente: ", error);
         }
     }
