@@ -43,12 +43,12 @@ export default function Cadastro({ navigation }) {
         }
     };
 
-    const criarHashSenha = async (url) => {
+    const criarHashSenha = async () => {
         const senhaHash = await Crypto.digestStringAsync(
             Crypto.CryptoDigestAlgorithm.SHA512,
             senha
         );
-        add(url, senhaHash)
+        add(senhaHash)
     };
 
     const uploadImageAndAdd = async () => {
@@ -59,8 +59,8 @@ export default function Cadastro({ navigation }) {
             return;
         }
         else {
-            var validCPF=await isValidCPF(cpf)
-            var validEmail=await isValidEmail(email)
+            var validCPF = await isValidCPF(cpf)
+            var validEmail = await isValidEmail(email)
             if (!validEmail) {
                 Alert.alert("E-mail válido ou ja esta em uso");
                 setCarregar(false)
@@ -77,34 +77,35 @@ export default function Cadastro({ navigation }) {
                 Alert.alert("Celular invalido");
                 setCarregar(false)
                 return;
-            } else if (!imagem) {
-                Alert.alert("Selecione uma imagem antes de prosseguir.");
-                setCarregar(false)
-                return;
             }
         }
+        if (imagem) {
+            const storage = getStorage();
+            const storageRef = ref(storage, 'uploads/' + Date.now() + '.jpg');
+            const result = await fetch(imagem);
+            const blob = await result.blob();
 
-        const storage = getStorage();
-        const storageRef = ref(storage, 'uploads/' + Date.now() + '.jpg');
+            await uploadBytes(storageRef, blob).catch((error) => {
+                console.error("Erro ao carregar a imagem:", error);
+            });
 
-        try {
-            const response = await fetch(imagem);
-            const blob = await response.blob();
-            await uploadBytes(storageRef, blob);
+            const downloadURL = await getDownloadURL(storageRef).catch((error) => {
+                console.error("Erro ao obter URL de download:", error);
+            });
 
-            // Após o upload bem-sucedido, obtenha a URL de download da imagem
-            const downloadURL = await getDownloadURL(storageRef);
+            if (downloadURL) {
+                setImagem(downloadURL);
 
-            // Continue com a adição do documento ao Firebase Firestore, usando a URL de download
-            criarHashSenha(downloadURL)
-        } catch (error) {
-            setCarregar(false)
-            console.error("Erro ao fazer o upload da imagem:", error);
-            Alert.alert("Erro ao fazer o upload da imagem. Tente novamente. Erro: " + error.message);
+                // Agora você pode adicionar os dados do atendente, incluindo a URL da imagem
+                criarHashSenha();
+            }
+        } else {
+            // Se nenhuma imagem foi selecionada, você pode adicionar os dados do atendente diretamente
+            criarHashSenha();
         }
     };
 
-    const add = (imagemURL, hash) => {
+    const add = (hash) => {
         const dataAtual = Timestamp.now();
 
         console.log("Adicionando documento ao Firestore...");
@@ -116,7 +117,7 @@ export default function Cadastro({ navigation }) {
             telefone: telefone,
             senha: hash,
             registro: "Cliente",
-            imagem: imagemURL,  // Use a URL da imagem aqui
+            imagem: imagem,  // Use a URL da imagem aqui
         })
             .then(() => {
                 setCarregar(false)
@@ -139,11 +140,13 @@ export default function Cadastro({ navigation }) {
 
     async function isValidEmail(email) {
         const pattern = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}$/;
-        var result=pattern.test(email)
-        if(result){
+        var result = pattern.test(email)
+        if (result) {
             const querySnapshot = await getDocs(query(collection(database, 'Clientes'), where('email', '==', email)));
-            return querySnapshot.empty
-        }
+            const querySnapshot2= await getDocs(query(collection(database, 'Atendentes'), where('email', '==', email)));
+            const querySnapshot3= await getDocs(query(collection(database, 'Admin'), where('email', '==', email)));
+            return (querySnapshot.empty && querySnapshot2.empty && querySnapshot3.empty)
+         }
         else
             return false
     }
@@ -319,7 +322,7 @@ export default function Cadastro({ navigation }) {
                         <Text style={styles.buttonText}>Confirmar</Text>
                     </TouchableOpacity>
                 }
-                {carregar && <ActivityIndicator style={{ marginTop: '5%' }} size="large" color="#FFFFFF" />}
+                {carregar && <ActivityIndicator style={{ marginTop: '5%' }} size="large" color="#99CC6A" />}
             </View>
         </ScrollView>
     );

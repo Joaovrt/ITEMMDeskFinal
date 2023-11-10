@@ -70,8 +70,8 @@ function VisualizarAtendente({ route, navigation }) {
             <Text style={styles.label}>Telefone:</Text>
             <Text style={styles.data}>{email}</Text>
 
-            <Text style={styles.label}>Telefone:</Text>
-            <Text style={styles.data}>{cpf}</Text>
+            {/* <Text style={styles.label}>Telefone:</Text>
+            <Text style={styles.data}>{cpf}</Text> */}
 
             <Text style={styles.label}>Departamento:</Text>
             <Text style={styles.data}>{departamento}</Text>

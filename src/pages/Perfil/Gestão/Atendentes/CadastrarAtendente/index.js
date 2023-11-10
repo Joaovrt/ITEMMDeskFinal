@@ -42,9 +42,17 @@ export default function CadastrarAtendente({ navigation }) {
             .join(' ');
     }
 
-    function isValidEmail(email) {
+    async function isValidEmail(email) {
         const pattern = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}$/;
-        return pattern.test(email);
+        var result=pattern.test(email)
+        if(result){
+            const querySnapshot = await getDocs(query(collection(database, 'Clientes'), where('email', '==', email)));
+            const querySnapshot2= await getDocs(query(collection(database, 'Atendentes'), where('email', '==', email)));
+            const querySnapshot3= await getDocs(query(collection(database, 'Admin'), where('email', '==', email)));
+            return (querySnapshot.empty && querySnapshot2.empty && querySnapshot3.empty)
+        }
+        else
+            return false
     }
 
     function isValidPassword(password) {
@@ -56,7 +64,7 @@ export default function CadastrarAtendente({ navigation }) {
         return password.length >= minLength && hasUpperCase && hasNumber && hasSpecialChar;
     }
 
-    function isValidCPF(cpf) {
+    async function isValidCPF(cpf) {
         const cpfStr = cpf?.replace(/[^\d]+/g, '');
 
         if (cpfStr === '') return false;
@@ -101,7 +109,8 @@ export default function CadastrarAtendente({ navigation }) {
 
         if (resto != parseInt(cpfStr.substring(10, 11))) return false;
 
-        return true;
+        const querySnapshot = await getDocs(query(collection(database, 'Atendentes'), where('cpf', '==', cpf)));
+        return querySnapshot.empty
     }
 
     function isValidTelefone(telefone) {
@@ -148,23 +157,33 @@ export default function CadastrarAtendente({ navigation }) {
       };
 
     const uploadImageAndAdd = async () => {
+        setCarregar(true)
         if (!AllFieldsAreFilled()) {
             Alert.alert("Preencha todos os campos");
             return;
-        } else if (!isValidEmail(email)) {
-            Alert.alert("Por favor, insira um e-mail válido");
-            return;
-        } else if (!isValidPassword(senha)) {
-            Alert.alert("A senha deve ter pelo menos 8 caracteres, 1 letra maiúscula, 1 número e 1 caractere especial");
-            return;
-        } else if (!isValidCPF(cpf)) {
-            Alert.alert("CPF invalido");
-            return;
-        } else if (!isValidTelefone(telefone)) {
-            Alert.alert("Celular invalido");
-            return;
+        } 
+        else {
+            var validCPF=await isValidCPF(cpf)
+            var validEmail=await isValidEmail(email)
+            if (!validEmail) {
+                Alert.alert("E-mail válido ou ja esta em uso");
+                setCarregar(false)
+                return;
+            } else if (!isValidPassword(senha)) {
+                Alert.alert("A senha deve ter pelo menos 8 caracteres, 1 letra maiúscula, 1 número e 1 caractere especial");
+                setCarregar(false)
+                return;
+            } else if (!validCPF) {
+                Alert.alert("CPF invalido ou ja esta em uso");
+                setCarregar(false)
+                return;
+            } else if (!isValidTelefone(telefone)) {
+                Alert.alert("Celular invalido");
+                setCarregar(false)
+                return;
+            }
         }
-        setCarregar(true)
+        
 
         if (imagem) {
             const storage = getStorage();

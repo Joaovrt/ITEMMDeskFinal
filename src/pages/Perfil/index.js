@@ -41,13 +41,13 @@ export default function Perfil({ navigation }) {
         } else if (!clientSnapshot.empty) {
             setIsClient(true);
             const clientData = clientSnapshot.docs[0]?.data();
-            setUserName(clientData?.nome || "Nome Desconhecido");
-            setUserImage(clientData?.imagem);
+            setUserName(clientData.nome);
+            setUserImage(clientData.imagem);
         } else if (!atendentSnapshot.empty) {
             setIsAtendent(true);
             const atendentData = atendentSnapshot.docs[0]?.data();
-            setUserName(atendentData?.nome || "Nome Desconhecido");
-            setUserImage(atendentData?.imagem);
+            setUserName(atendentData.nome);
+            setUserImage(atendentData.imagem);
         }
         setCarregar(false)
     };
@@ -59,7 +59,7 @@ export default function Perfil({ navigation }) {
 
         // Cleanup da inscrição do evento quando o componente é desmontado
         return unsubscribe;
-    }, [navigation]); 
+    }, [navigation, userEmail]); 
 
     function handlerMeusChamados() {
         navigation.navigate("MeusChamados");

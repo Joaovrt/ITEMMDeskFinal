@@ -1,11 +1,12 @@
 import React, { useState, useEffect } from "react";
 import { View, Text, TextInput, TouchableOpacity,Button, StyleSheet, Image, Alert, ActivityIndicator } from "react-native";
-import { getFirestore, collection, getDocs, doc, getDoc, setDoc, addDoc, updateDoc  } from 'firebase/firestore';
+import { getFirestore, collection, getDocs, doc, getDoc, setDoc, addDoc, updateDoc, query, where  } from 'firebase/firestore';
 import { getStorage, ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { database } from "../../../../config";
 import * as ImagePicker from 'expo-image-picker'; // Importe o ImagePicker
 import { Ionicons } from '@expo/vector-icons';
 import * as Crypto from 'expo-crypto';
+import { useUser } from '../../../../contexts/UserContext';
 
 export default function EditarPerfil({ navigation, route }) {
     const [nome, setNome] = useState("");
@@ -20,6 +21,7 @@ export default function EditarPerfil({ navigation, route }) {
     const [originalTelefone, setOriginalTelefone] = useState("");
     const [originalNome, setOriginalNome] = useState("");
     const [carregar, setCarregar] = useState(false)
+    const { userEmail, setUserEmail } = useUser();
     
     function capitalizeName(name) {
         return name
@@ -28,9 +30,21 @@ export default function EditarPerfil({ navigation, route }) {
             .join(' ');
     }
 
-    function isValidEmail(email) {
+    async function isValidEmail(email) {
         const pattern = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}$/;
-        return pattern.test(email);
+        var result=pattern.test(email)
+        if(originalCpf!=cpf){
+            if(result){
+                const querySnapshot = await getDocs(query(collection(database, 'Clientes'), where('email', '==', email)));
+                const querySnapshot2= await getDocs(query(collection(database, 'Atendentes'), where('email', '==', email)));
+                const querySnapshot3= await getDocs(query(collection(database, 'Admin'), where('email', '==', email)));
+                return (querySnapshot.empty && querySnapshot2.empty && querySnapshot3.empty)
+            }
+            else
+                return false
+        }
+        else
+            return true
     }
 
     function isValidPassword(password) {
@@ -48,7 +62,7 @@ export default function EditarPerfil({ navigation, route }) {
             return true
     }
 
-    function isValidCPF(cpf) {
+    async function isValidCPF(cpf) {
         const cpfStr = cpf?.replace(/[^\d]+/g, '');
 
         if (cpfStr === '') return false;
@@ -93,7 +107,12 @@ export default function EditarPerfil({ navigation, route }) {
 
         if (resto != parseInt(cpfStr.substring(10, 11))) return false;
 
-        return true;
+        if(originalCpf!=cpf){
+            const querySnapshot = await getDocs(query(collection(database, 'Clientes'), where('cpf', '==', cpf)));
+            return querySnapshot.empty
+        }
+        else
+            return true
     }
 
     function isValidTelefone(telefone) {
@@ -130,23 +149,32 @@ export default function EditarPerfil({ navigation, route }) {
     };
 
     const uploadImageAndAtt = async () => {
+        setCarregar(true)
         if (!AllFieldsAreFilled()) {
             Alert.alert("Preencha todos os campos");
             return;
-        } else if (!isValidEmail(email)) {
-            Alert.alert("Por favor, insira um e-mail válido");
-            return;
-        } else if (!isValidPassword(senha)) {
-            Alert.alert("A senha deve ter pelo menos 8 caracteres, 1 letra maiúscula, 1 número e 1 caractere especial");
-            return;
-        } else if (!isValidCPF(cpf)) {
-            Alert.alert("CPF invalido");
-            return;
-        } else if (!isValidTelefone(telefone)) {
-            Alert.alert("Celular invalido");
-            return;
+        } 
+        else {
+            var validCPF=await isValidCPF(cpf)
+            var validEmail=await isValidEmail(email)
+            if (!validEmail) {
+                Alert.alert("E-mail válido ou ja esta em uso");
+                setCarregar(false)
+                return;
+            } else if (!isValidPassword(senha)) {
+                Alert.alert("A senha deve ter pelo menos 8 caracteres, 1 letra maiúscula, 1 número e 1 caractere especial");
+                setCarregar(false)
+                return;
+            } else if (!validCPF) {
+                Alert.alert("CPF invalido ou ja esta em uso");
+                setCarregar(false)
+                return;
+            } else if (!isValidTelefone(telefone)) {
+                Alert.alert("Celular invalido");
+                setCarregar(false)
+                return;
+            }
         }
-        setCarregar(true)
         if (imagem) {
             const storage = getStorage();
             const storageRef = ref(storage, 'uploads/' + Date.now() + '.jpg');
@@ -201,6 +229,7 @@ export default function EditarPerfil({ navigation, route }) {
         .then(() => {
             setCarregar(false)
             console.log("Documento atualizado com sucesso.");
+            setUserEmail(email);
             navigation.pop(2);
         })
         .catch((error) => {

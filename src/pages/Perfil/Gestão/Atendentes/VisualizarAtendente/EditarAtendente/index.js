@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, ScrollView, Button, ActivityIndicator, Alert } from "react-native";
 import { Picker } from '@react-native-picker/picker';
-import { getFirestore, collection, getDocs, doc, getDoc, setDoc, addDoc, updateDoc } from 'firebase/firestore';
+import { getFirestore, collection, getDocs, doc, getDoc, setDoc, addDoc, updateDoc, query, where } from 'firebase/firestore';
 import { database } from "../../../../../../config";
 import { Ionicons } from '@expo/vector-icons';
 import * as ImagePicker from 'expo-image-picker';
@@ -60,9 +60,21 @@ export default function EditarAtendente({ navigation, route }) {
             .join(' ');
     }
 
-    function isValidEmail(email) {
+    async function isValidEmail(email) {
         const pattern = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}$/;
-        return pattern.test(email);
+        var result=pattern.test(email)
+        if(originalCpf!=cpf){
+            if(result){
+                const querySnapshot = await getDocs(query(collection(database, 'Clientes'), where('email', '==', email)));
+                const querySnapshot2= await getDocs(query(collection(database, 'Atendentes'), where('email', '==', email)));
+                const querySnapshot3= await getDocs(query(collection(database, 'Admin'), where('email', '==', email)));
+                return (querySnapshot.empty && querySnapshot2.empty && querySnapshot3.empty)
+            }
+            else
+                return false
+        }
+        else
+            return true
     }
 
     function isValidPassword(password) {
@@ -80,7 +92,7 @@ export default function EditarAtendente({ navigation, route }) {
             return true
     }
 
-    function isValidCPF(cpf) {
+    async function isValidCPF(cpf) {
         const cpfStr = cpf?.replace(/[^\d]+/g, '');
 
         if (cpfStr === '') return false;
@@ -124,8 +136,13 @@ export default function EditarAtendente({ navigation, route }) {
         if ((resto == 10) || (resto == 11)) resto = 0;
 
         if (resto != parseInt(cpfStr.substring(10, 11))) return false;
-
-        return true;
+        if(originalCpf!=cpf){
+            const querySnapshot = await getDocs(query(collection(database, 'Atendentes'), where('cpf', '==', cpf)));
+            return querySnapshot.empty
+        }
+        else
+            return true
+        
     }
 
     function isValidTelefone(telefone) {
@@ -163,23 +180,32 @@ export default function EditarAtendente({ navigation, route }) {
     };
 
     const uploadImageAndAtt = async () => {
+        setCarregar(true)
         if (!AllFieldsAreFilled()) {
             Alert.alert("Preencha todos os campos");
             return;
-        } else if (!isValidEmail(email)) {
-            Alert.alert("Por favor, insira um e-mail válido");
-            return;
-        } else if (!isValidPassword(senha)) {
-            Alert.alert("A senha deve ter pelo menos 8 caracteres, 1 letra maiúscula, 1 número e 1 caractere especial");
-            return;
-        } else if (!isValidCPF(cpf)) {
-            Alert.alert("CPF invalido");
-            return;
-        } else if (!isValidTelefone(telefone)) {
-            Alert.alert("Celular invalido");
-            return;
+        } 
+        else {
+            var validCPF=await isValidCPF(cpf)
+            var validEmail=await isValidEmail(email)
+            if (!validEmail) {
+                Alert.alert("E-mail válido ou ja esta em uso");
+                setCarregar(false)
+                return;
+            } else if (!isValidPassword(senha)) {
+                Alert.alert("A senha deve ter pelo menos 8 caracteres, 1 letra maiúscula, 1 número e 1 caractere especial");
+                setCarregar(false)
+                return;
+            } else if (!validCPF) {
+                Alert.alert("CPF invalido ou ja esta em uso");
+                setCarregar(false)
+                return;
+            } else if (!isValidTelefone(telefone)) {
+                Alert.alert("Celular invalido");
+                setCarregar(false)
+                return;
+            }
         }
-        setCarregar(true)
         if (imagem) {
             const storage = getStorage();
             const storageRef = ref(storage, 'uploads/' + Date.now() + '.jpg');
