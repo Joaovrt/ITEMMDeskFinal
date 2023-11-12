@@ -132,7 +132,6 @@ export default function Home({navigation}) {
                             backgroundColor: 'black',
                             backgroundGradientFrom: 'black',
                             backgroundGradientTo: 'black',
-                            decimalPlaces: 0,
                             color: (opacity = 1) => `rgba(255, 255, 255, ${opacity})`,
                             fillShadowGradient: 'rgb(153, 204, 106)',
                             fillShadowGradientOpacity: 1,
