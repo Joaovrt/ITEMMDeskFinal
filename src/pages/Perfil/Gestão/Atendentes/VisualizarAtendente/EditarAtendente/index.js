@@ -175,7 +175,9 @@ export default function EditarAtendente({ navigation, route }) {
         });
 
         if (!result.canceled) {
-            setImagem(result.assets[0].uri);
+            if (result.assets && result.assets.length > 0) {
+                setImagem(result.assets[0].uri);
+            }
         }
     };
 

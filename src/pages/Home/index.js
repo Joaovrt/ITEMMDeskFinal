@@ -9,16 +9,16 @@ import { BackHandler } from 'react-native';
 
 import { database } from "../../config";
 
-export default function Home() {
+export default function Home({navigation}) {
     const [data, setData] = useState({
         labels: ["Abertos", "Em Andamento", "Atrasados", "Finalizados"],
         datasets: [{ data: [0, 0, 0, 0] }]
     });
 
-    const [yAxisValues, setYAxisValues] = useState([0, 3, 5, 10, 15]);
     const [carregar,setCarregar]=useState(true)
 
     const updateData = async () => {
+        setCarregar(true)
         const collecRef = collection(database, 'Chamados');
 
         const getCount = async (status) => {
@@ -111,7 +111,7 @@ export default function Home() {
             unsubscribe();
             BackHandler.removeEventListener('hardwareBackPress', handleBackButton);
         };
-    }, []);
+    }, [navigation]);
 
     return (
         <View style={styles.container}>
@@ -145,11 +145,6 @@ export default function Home() {
                             borderRadius: 16,
                         }}
                     />
-                    <View style={styles.yAxis}>
-                        {yAxisValues.map((value, index) => (
-                            <Text key={index} style={styles.yAxisLabel}>{value}</Text>
-                        ))}
-                    </View>
                 </View>
             </View>}
             <TouchableOpacity style={styles.button} onPress={generateExcel}>

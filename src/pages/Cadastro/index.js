@@ -36,10 +36,10 @@ export default function Cadastro({ navigation }) {
             quality: 1,
         });
 
-        if (!result.cancelled) {
-            // `result.assets[0].uri` contém o URI da imagem selecionada.
-            console.log('Imagem selecionada:', result.assets[0].uri);
-            setImagem(result.assets[0].uri); // Atualize o estado da imagem com o URI selecionado.
+        if (!result.canceled) {
+            if (result.assets && result.assets.length > 0) {
+                setImagem(result.assets[0].uri);
+            }
         }
     };
 

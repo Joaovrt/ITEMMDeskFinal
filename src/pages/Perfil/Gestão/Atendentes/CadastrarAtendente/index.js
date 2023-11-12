@@ -143,8 +143,10 @@ export default function CadastrarAtendente({ navigation }) {
             quality: 1,
         });
 
-        if (!result.cancelled) {
-            setImagem(result.uri);
+        if (!result.canceled) {
+            if (result.assets && result.assets.length > 0) {
+                setImagem(result.assets[0].uri);
+            }
         }
     };
 
